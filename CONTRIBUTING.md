@@ -23,7 +23,7 @@ Conventional Commits with a scope:
 Every rule here follows the canon slot skeleton and stable-id scheme:
 
 - Write rules in the `Rule` / `Why` / `Detect` / `Do` / `Don't` / `See also` skeleton owned by `winter-canon:/rule-shape.md`; keep hubs pure routers and let spokes own content (`winter-canon:/progressive-disclosure.md`).
-- Give every rule a stable `bzh:<slug>` id in its heading and record it in the owning hub's routing (`blizzard-harness:/index.md` §"Rule ids").
+- Give every rule a stable `bzh:<slug>` id in its heading — the id's single home (`blizzard-harness:/index.md` §"Rule ids"); treat a rename or removal as a breaking change for anything citing it.
 - Follow the cross-cutting authoring principles in `winter-canon:/principles.md` — one canonical owner per fact, point don't duplicate, no retrospective framing, no manual line-wrapping, minimal examples.
 - A new rule or routing change is a harness change: run the cold-spawn eval it is owed before pushing (`winter-canon:/evaluating-harness-changes.md`).
 

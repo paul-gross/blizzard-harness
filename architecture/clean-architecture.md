@@ -23,7 +23,7 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **Detect.** A domain module importing `fastapi`, `sqlalchemy`, `click`, `httpx`, or `pathlib` I/O; a business rule reachable only by standing up a store or an HTTP app.
 
-**Do.** A `chunk` domain type and its transition rules that import only other domain types and the `winter-canon:`-agnostic standard library; the store and the API depend on it.
+**Do.** A `chunk` domain type and its transition rules that import only other domain types and the framework-agnostic standard library; the store and the API depend on it.
 
 **Don't.** A domain function that opens a SQLAlchemy session or reads a request object — the rule now cannot run or be tested without the framework.
 

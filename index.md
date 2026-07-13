@@ -14,7 +14,7 @@ The universal substrate this harness derives from is addressed with the `winter-
 
 Every blizzard-harness rule carries a stable `bzh:<slug>` id in its heading — the citation handle a plan, a review finding, or a cross-reference uses.
 The `bzh:` scheme is this harness's own, parallel to the canon's `canon:<slug>` (`winter-canon:/rule-shape.md` owns the slot skeleton and the stable-id scheme both follow).
-Ids are stable: citations depend on them, so a rename is a breaking change, and adding or removing a rule updates the owning hub's routing in the same change.
+Ids are stable: citations depend on them, so renaming or removing a rule's id is a breaking change. A rule's heading is the id's single home — there is no separate id registry to keep in sync.
 
 ## Domains
 

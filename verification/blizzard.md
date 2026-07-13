@@ -8,7 +8,7 @@ Scopes here: **`blizzard`** for the app repo's Python QA and the daemon-level ti
 
 ## Seeded ahead of the code — every row is a named gap
 
-The `blizzard` and `blizzard-mock` repos are README-only seeds at this point in the bootstrap; the frontend, the daemons, the mock fleet, and the service manifests do not exist yet.
+The `blizzard` and `blizzard-mock` repos are README-only seeds at this point in the bootstrap; the frontend, the daemons, and the mock fleet do not exist yet.
 This matrix is therefore seeded **ahead** of the code it describes: each row states the method's stable id and its *intended* command or exercise, and carries a **Gap (phase N)** marker naming the bootstrap phase that makes it real.
 The gaps are recorded rather than omitted so a planner can see the full verification surface and know which methods it must help build.
 When a phase lands its methods, drop the Gap marker from those rows in the same change.
@@ -71,7 +71,7 @@ Setup an agent uses to stand up the scenario a verification needs — not assert
 
 | Tool | Use |
 |------|-----|
-| tool:service-up | `winter service up <env> --wait` — bring up the verification stack (postgres first, then the service slots) for a feature env, port-band isolated. **Gap (P3)** — the service manifests are unwritten. |
+| tool:service-up | `winter service up <env> --wait` — bring up the verification stack for a feature env, port-band isolated. **As of P3** this brings up a **per-env postgres** (its own container + band port, `--wait` gated on a real `pg_isready` healthcheck); parallel envs isolate with zero port collisions. The mock-forge (P4), `blizzard hub` (P5), and `blizzard runner` (P6) are reserved slots in the manifests — declared but empty, so still **gaps** until those phases fill them. |
 | tool:mock-fleet | The `blizzard-mock` fleet — mock GitHub forge (bare git repos), mock coding harness (prompt-is-the-program), mock hub, mock runner — bound at the seams so a scenario runs with no tokens or network. **Gap (P4)**. |
 | tool:mock-data | The mock-data CLI — seed the hub and runner stores into a known world for the upper tiers and the crash sweep. **Gap (P4)** — grows alongside the domain models it operates on. |
 | tool:fixture-workspace | The fixture-workspace scaffold — bare `file://` origins plus a generated winter workspace, the environment the service and e2e tiers and the sweep run against. **Gap (P4)**. |
