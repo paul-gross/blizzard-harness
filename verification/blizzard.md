@@ -8,7 +8,7 @@ Scopes here: **`blizzard`** for the app repo's Python QA and the daemon-level ti
 
 ## Seeded ahead of the code — every row is a named gap
 
-As of **P4** the `blizzard-mock` fleet is built (mock forge, fixture-workspace scaffold, mock coding-harness engine + façades, mock-data CLI skeleton), so its rows are real commands; the `blizzard` app repo — the frontend and the daemons — is still a README-only seed.
+As of **P5** the `blizzard` app scaffold is built — the two daemons (hub, runner) with their HTTP APIs, the CLI, both Alembic stores, the Angular frontend workspace, and the one-wheel build entrypoint — so its Python-QA, frontend, and wheel/gate rows are real commands (joining the `blizzard-mock` rows made real in P4). What remains ahead of its code is the **P6** upper tier: the service and e2e tiers and the kill-9 crash sweep, which need the walking-skeleton loop, the steppable daemons, and the mock hub/runner.
 This matrix is therefore seeded **ahead** of the code it describes: a row with a live method states its real command, while a row for code that does not exist yet states its *intended* command or exercise and carries a **Gap (phase N)** marker naming the bootstrap phase that makes it real.
 The gaps are recorded rather than omitted so a planner can see the full verification surface and know which methods it must help build.
 When a phase lands its methods, drop the Gap marker from those rows in the same change.
@@ -20,18 +20,22 @@ Verification that runs as a single command — exit 0 is the pass signal.
 
 | Method | Command |
 |--------|---------|
-| blizzard:build | `uv sync` — install the `blizzard` project and its `dev` group. **Gap (P5)** — no `pyproject.toml` in the seed. |
-| blizzard:lint | `uv run ruff check .` ([../standards/python.md](../standards/python.md)). **Gap (P5)**. |
-| blizzard:format | `uv run ruff format --check .` ([../standards/python.md](../standards/python.md)). **Gap (P5)**. |
-| blizzard:typecheck | `uv run pyright` ([../standards/python.md](../standards/python.md)). **Gap (P5)**. |
-| blizzard:unit-test | `uv run pytest` — the unit tier: one class or function in isolation ([tiers](#test-tiers)). **Gap (P5)**. |
-| blizzard:component-test | `uv run pytest` (component-marked) — a domain slice wired with real internal collaborators, doubles only at the seams ([tiers](#test-tiers)). **Gap (P5)**. |
+| blizzard:build | `uv sync` — install the `blizzard` project and its `dev` group (run from the repo root). |
+| blizzard:lint | `uv run ruff check .` ([../standards/python.md](../standards/python.md)). |
+| blizzard:format | `uv run ruff format --check .` ([../standards/python.md](../standards/python.md)). |
+| blizzard:typecheck | `uv run pyright` ([../standards/python.md](../standards/python.md)). |
+| blizzard:unit-test | `uv run pytest -m unit` — the unit tier: one class or function in isolation ([tiers](#test-tiers)). Bare `uv run pytest` runs the unit + component default suite. |
+| blizzard:component-test | `uv run pytest -m component` — a domain slice wired with real internal collaborators, doubles only at the seams ([tiers](#test-tiers)). |
+| blizzard:gate | `mise run gate` (`./scripts/ci-gate.sh`) — the local PR-to-master merge-gate parity: ruff format --check + ruff check + pyright + pytest, the OpenAPI spec-drift check, then eslint + vitest + generated-client drift over `web/`. One command reproduces the whole `pr` workflow before pushing. |
+| blizzard:wheel | `mise run build` (`./scripts/build-wheel.sh`) — the one build entrypoint (D-061): builds both Angular apps into `src/blizzard/static/{hub,runner}`, builds the single wheel (`uv build --wheel`) embedding those assets plus both migration trees, then installs it into a clean **node-free** venv and runs `blizzard --version` — proving the released artifact needs no Node. `BLIZZARD_VERSION` overrides the wheel version (dev builds / tag releases). |
+| blizzard:wheel-smoke | The exit-criterion serve smoke on the built wheel (node-free venv): `blizzard hub init <dir>` (idempotent, store migrated to head) then `blizzard hub host --dir <dir> --port <p>` serves the embedded mission-control board (`GET /` → the Angular `index.html` + hashed JS bundles, deep routes fall back to it) with `GET /api/health` → `200`; the same for `blizzard runner init`/`host` (the local-panel shell). This is the **P5 exit criterion** (`blizzard-discovery` repo, `implementation/bootstrap.md`). |
+| blizzard:ci | `gh run watch --repo paul-gross/blizzard <run-id> --exit-status` — watch a GitHub Actions run (the `push` merge-gate on master, or the `pr` gate on a PR) to completion and exit non-zero if it failed; the authoritative remote gate. List runs with `gh run list --repo paul-gross/blizzard`; inspect a failure with `gh run view --repo paul-gross/blizzard <run-id> --log-failed` (the workflows and this watch loop are documented in the `blizzard` app repo's `docs/ci.md`). |
 | blizzard:service-test | The service tier: a running hub or runner's HTTP API exercised from outside, all seams bound to the mock fleet — Playwright. **Gap (P6)**. |
 | blizzard:e2e | The e2e tier: hub + runner + web app through the browser and CLI, fully local with every seam bound to the mock fleet — Playwright, a separate project from the service tier. **Gap (P6)**. |
 | blizzard:crash-sweep | The kill-9 sweep: a pytest-driven runner iterating the crash-point registry, running the daemons as real subprocesses and asserting the invariant checker after each armed crash ([../architecture/crash-correctness.md](../architecture/crash-correctness.md)). **Gap (P6)** — depends on the steppable loop, injected clock, registry, and checker existing. |
-| web:lint | `npm run lint` — eslint over the Angular workspace ([../standards/frontend.md](../standards/frontend.md)). **Gap (P5)**. |
-| web:unit-test | `npm run test` — vitest, the frontend unit/component tier ([../standards/frontend.md](../standards/frontend.md)). **Gap (P5)**. |
-| web:client-drift | Regenerate the openapi-ts client and fail on any uncommitted diff ([../standards/frontend.md](../standards/frontend.md), `bzh:generated-client`). **Gap (P5)**. |
+| web:lint | `npm run lint` in `web/` — eslint over the Angular workspace, all four projects ([../standards/frontend.md](../standards/frontend.md)). |
+| web:unit-test | `npm run test` in `web/` — vitest, the frontend unit/component tier over all four projects ([../standards/frontend.md](../standards/frontend.md)). |
+| web:client-drift | `npm run generate:client` in `web/` (openapi-ts codegen from `openapi/{hub,runner}.openapi.json`), then fail on any uncommitted diff in `web/` ([../standards/frontend.md](../standards/frontend.md), `bzh:generated-client`). The Python half regenerates the specs via `uv run blizzard-export-openapi --out-dir openapi` and fails on a diff in `openapi/`. |
 | blizzard-mock:build | `uv sync` in the `blizzard-mock` repo. |
 | blizzard-mock:lint | `uv run ruff check .` ([../standards/python.md](../standards/python.md)). |
 | blizzard-mock:format | `uv run ruff format --check .` ([../standards/python.md](../standards/python.md)). |
@@ -84,7 +88,7 @@ Setup an agent uses to stand up the scenario a verification needs — not assert
 
 | Tool | Use |
 |------|-----|
-| tool:service-up | `winter service up <env> --wait` — bring up the verification stack for a feature env, port-band isolated. **As of P3** this brings up a **per-env postgres** (its own container + band port, `--wait` gated on a real `pg_isready` healthcheck); **as of P4** it also brings up the **mock GitHub forge** (band `+1`, from the env's `blizzard-mock` worktree, `--wait` gated on the forge's uvicorn ready-line log probe, fronting `$BZ_FORGE_REPOS_DIR` — the fixture workspace's per-env bare origins). Parallel envs isolate with zero port collisions. `blizzard hub` (P5) and `blizzard runner` (P6) are reserved slots in the manifests — declared but empty, so still **gaps** until those phases fill them. |
+| tool:service-up | `winter service up <env> --wait` — bring up the verification stack for a feature env, port-band isolated. **As of P3** this brings up a **per-env postgres** (its own container + band port, `--wait` gated on a real `pg_isready` healthcheck); **as of P4** it also brings up the **mock GitHub forge** (band `+1`, from the env's `blizzard-mock` worktree, `--wait` gated on the forge's uvicorn ready-line log probe, fronting `$BZ_FORGE_REPOS_DIR` — the fixture workspace's per-env bare origins). Parallel envs isolate with zero port collisions. As of **P5** the `blizzard hub` / `blizzard runner` daemon binaries and their embedded boards exist and serve node-free (`blizzard:wheel-smoke`), but their tmux service slots (bands `+2`/`+3`) stay **commented** in the manifest — the live per-env daemons are wired here in **P6**, so `service-up` does not yet bring them up. |
 | tool:mock-fleet | The `blizzard-mock` fleet. **As of P4** the mock GitHub forge (bare git repos, `blizzard-mock-forge`), the fixture-workspace scaffold, and the mock coding harness (prompt-is-the-program, `mock-claude-code`/`mock-codex`/`mock-opencode`) are built and bound at the seams so a scenario runs with no tokens or network. The **mock hub** and **mock runner** — the counterpart mocks the daemons are built against — remain **gaps** until the daemons need them (P5/P6). |
 | tool:mock-data | The mock-data CLI (`blizzard-mock-data`) — seed the hub and runner stores into a known world for the upper tiers and the crash sweep. The CLI **skeleton** is built (P4); it **grows alongside the domain models it operates on**, so seeding real store state is a **Gap (P5+)** until those models exist. |
 | tool:fixture-workspace | The fixture-workspace scaffold (`blizzard-mock-fixture`) — mints bare `file://` origins plus a generated, disposable winter workspace, the environment the service and e2e tiers and the sweep run against. **Built (P4).** |
