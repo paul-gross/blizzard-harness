@@ -37,7 +37,7 @@ Verification that runs as a single command — exit 0 is the pass signal.
 | blizzard-mock:format | `uv run ruff format --check .` ([../standards/python.md](../standards/python.md)). |
 | blizzard-mock:typecheck | `uv run pyright` ([../standards/python.md](../standards/python.md)). |
 | blizzard-mock:unit-test | `uv run pytest` — the default suite: unit + component coverage of the mock forge, the fixture-workspace scaffold, the mock coding-harness engine + façades, and the mock-data CLI (component tiers drive real git and a real `winter ws init`). |
-| blizzard-mock:e2e | `uv run pytest -m e2e` — the fleet acceptance proof (`blizzard-mock` repo, `tests/test_acceptance_loop_e2e.py`): a scripted prompt run through the mock harness in a fixture-workspace env lands a commit the mock forge merges to bare `master`, all seams real — the **P4 exit criterion** (`blizzard-discovery` repo, `implementation/bootstrap.md`). Skipped without a discoverable winter source. |
+| blizzard-mock:e2e | `uv run pytest -m e2e` — the fleet acceptance proof (`blizzard-mock` repo, `tests/test_acceptance_loop_e2e.py`): a scripted prompt run through the mock harness in a fixture-workspace env lands a commit the mock forge merges to bare `main`, all seams real — the **P4 exit criterion** (`blizzard-discovery` repo, `implementation/bootstrap.md`). Skipped without a discoverable winter source. |
 
 ## Test tiers
 
@@ -66,6 +66,17 @@ Surface: the walking skeleton — one chunk traveling ingest → acquire → moc
 Setup: a fixture-workspace env (`tool:fixture-workspace`) with the hub, the runner, and the mock fleet bound; postgres or sqlite up via the service stack (`tool:service-up`).
 Pass: the chunk lands in the bare origin and every store invariant holds, run fully locally with no tokens and no network.
 **Gap (P6)** — this loop *is* the walking skeleton; once it passes it becomes the standing e2e smoke test (`blizzard:e2e`). Its P4 precursor already runs: `blizzard-mock:e2e` exercises the same ingest-less push→PR→merge→land arc with the mock fleet alone (no `blizzard` code), proving the seams before the daemons that drive them exist.
+
+### blizzard-mock:manual — the live wired-service forge over a real fixture
+Surface: the winter-wired mock forge (`tool:service-up`, band `+1`) fronting a real fixture workspace's per-env bare origins — the same single git truth the daemons will bind to, exercised out of process rather than in-test.
+Setup — mint a fixture at the path the forge reads (`$BZ_FORGE_REPOS_DIR = ${BLIZZARD_MOCK_SCRATCH_ROOT}/${WINTER_ENV}/origins`), then bring the stack up. Run from the workspace root:
+```
+BLIZZARD_MOCK_SCRATCH_ROOT=/tmp/blizzard-mock/fixtures WINTER_ENV=alpha \
+  sh -c 'cd alpha/blizzard-mock && uv run blizzard-mock-fixture mint --env alpha'
+winter service up alpha --wait
+```
+The fixture's winter source resolves by walking up from the `blizzard-mock` worktree to the workspace root — **do not pass `--winter-source $PWD`**: inside a `cd … && …` subshell `$PWD` expands *after* the `cd`, so it names the `blizzard-mock` checkout (which has no `tools/winter-cli`) and minting fails. Let the walk-up default resolve it, or set `$BLIZZARD_MOCK_WINTER_SOURCE` to the workspace root explicitly.
+Pass: `curl -fs localhost:${BZ_FORGE_PORT:-4421}/healthz` returns `ok`, and `curl -fs localhost:${BZ_FORGE_PORT:-4421}/repos/blizzard/toy-api` returns `200` with `"default_branch": "main"` — the live forge fronts the minted origins. Leave services down after (`winter service down alpha`; remove the fixture with `blizzard-mock-fixture destroy --env alpha`).
 
 ## Tools
 
