@@ -8,8 +8,8 @@ Scopes here: **`blizzard`** for the app repo's Python QA and the daemon-level ti
 
 ## Seeded ahead of the code — every row is a named gap
 
-The `blizzard` and `blizzard-mock` repos are README-only seeds at this point in the bootstrap; the frontend, the daemons, and the mock fleet do not exist yet.
-This matrix is therefore seeded **ahead** of the code it describes: each row states the method's stable id and its *intended* command or exercise, and carries a **Gap (phase N)** marker naming the bootstrap phase that makes it real.
+As of **P4** the `blizzard-mock` fleet is built (mock forge, fixture-workspace scaffold, mock coding-harness engine + façades, mock-data CLI skeleton), so its rows are real commands; the `blizzard` app repo — the frontend and the daemons — is still a README-only seed.
+This matrix is therefore seeded **ahead** of the code it describes: a row with a live method states its real command, while a row for code that does not exist yet states its *intended* command or exercise and carries a **Gap (phase N)** marker naming the bootstrap phase that makes it real.
 The gaps are recorded rather than omitted so a planner can see the full verification surface and know which methods it must help build.
 When a phase lands its methods, drop the Gap marker from those rows in the same change.
 Bootstrap phases: **P3** service manifests, **P4** `blizzard-mock` fleet, **P5** `blizzard` scaffold, **P6** the walking-skeleton acceptance loop.
@@ -32,10 +32,12 @@ Verification that runs as a single command — exit 0 is the pass signal.
 | web:lint | `npm run lint` — eslint over the Angular workspace ([../standards/frontend.md](../standards/frontend.md)). **Gap (P5)**. |
 | web:unit-test | `npm run test` — vitest, the frontend unit/component tier ([../standards/frontend.md](../standards/frontend.md)). **Gap (P5)**. |
 | web:client-drift | Regenerate the openapi-ts client and fail on any uncommitted diff ([../standards/frontend.md](../standards/frontend.md), `bzh:generated-client`). **Gap (P5)**. |
-| blizzard-mock:build | `uv sync` in the `blizzard-mock` repo. **Gap (P4)**. |
-| blizzard-mock:lint | `uv run ruff check .` ([../standards/python.md](../standards/python.md)). **Gap (P4)**. |
-| blizzard-mock:typecheck | `uv run pyright` ([../standards/python.md](../standards/python.md)). **Gap (P4)**. |
-| blizzard-mock:unit-test | `uv run pytest` — unit coverage of the mock forge, mock harness, and mock-data CLI. **Gap (P4)**. |
+| blizzard-mock:build | `uv sync` in the `blizzard-mock` repo. |
+| blizzard-mock:lint | `uv run ruff check .` ([../standards/python.md](../standards/python.md)). |
+| blizzard-mock:format | `uv run ruff format --check .` ([../standards/python.md](../standards/python.md)). |
+| blizzard-mock:typecheck | `uv run pyright` ([../standards/python.md](../standards/python.md)). |
+| blizzard-mock:unit-test | `uv run pytest` — the default suite: unit + component coverage of the mock forge, the fixture-workspace scaffold, the mock coding-harness engine + façades, and the mock-data CLI (component tiers drive real git and a real `winter ws init`). |
+| blizzard-mock:e2e | `uv run pytest -m e2e` — the fleet acceptance proof (`blizzard-mock` repo, `tests/test_acceptance_loop_e2e.py`): a scripted prompt run through the mock harness in a fixture-workspace env lands a commit the mock forge merges to bare `master`, all seams real — the **P4 exit criterion** (`blizzard-discovery` repo, `implementation/bootstrap.md`). Skipped without a discoverable winter source. |
 
 ## Test tiers
 
@@ -63,7 +65,7 @@ The mocks the upper tiers bind are owned by `blizzard-mock` (P4); the tier *rule
 Surface: the walking skeleton — one chunk traveling ingest → acquire → mock-scripted commit → deliver → landed in a bare origin, with `done` derived from facts.
 Setup: a fixture-workspace env (`tool:fixture-workspace`) with the hub, the runner, and the mock fleet bound; postgres or sqlite up via the service stack (`tool:service-up`).
 Pass: the chunk lands in the bare origin and every store invariant holds, run fully locally with no tokens and no network.
-**Gap (P6)** — this loop *is* the walking skeleton; once it passes it becomes the standing e2e smoke test (`blizzard:e2e`).
+**Gap (P6)** — this loop *is* the walking skeleton; once it passes it becomes the standing e2e smoke test (`blizzard:e2e`). Its P4 precursor already runs: `blizzard-mock:e2e` exercises the same ingest-less push→PR→merge→land arc with the mock fleet alone (no `blizzard` code), proving the seams before the daemons that drive them exist.
 
 ## Tools
 
@@ -71,10 +73,10 @@ Setup an agent uses to stand up the scenario a verification needs — not assert
 
 | Tool | Use |
 |------|-----|
-| tool:service-up | `winter service up <env> --wait` — bring up the verification stack for a feature env, port-band isolated. **As of P3** this brings up a **per-env postgres** (its own container + band port, `--wait` gated on a real `pg_isready` healthcheck); parallel envs isolate with zero port collisions. The mock-forge (P4), `blizzard hub` (P5), and `blizzard runner` (P6) are reserved slots in the manifests — declared but empty, so still **gaps** until those phases fill them. |
-| tool:mock-fleet | The `blizzard-mock` fleet — mock GitHub forge (bare git repos), mock coding harness (prompt-is-the-program), mock hub, mock runner — bound at the seams so a scenario runs with no tokens or network. **Gap (P4)**. |
-| tool:mock-data | The mock-data CLI — seed the hub and runner stores into a known world for the upper tiers and the crash sweep. **Gap (P4)** — grows alongside the domain models it operates on. |
-| tool:fixture-workspace | The fixture-workspace scaffold — bare `file://` origins plus a generated winter workspace, the environment the service and e2e tiers and the sweep run against. **Gap (P4)**. |
+| tool:service-up | `winter service up <env> --wait` — bring up the verification stack for a feature env, port-band isolated. **As of P3** this brings up a **per-env postgres** (its own container + band port, `--wait` gated on a real `pg_isready` healthcheck); **as of P4** it also brings up the **mock GitHub forge** (band `+1`, from the env's `blizzard-mock` worktree, `--wait` gated on the forge's uvicorn ready-line log probe, fronting `$BZ_FORGE_REPOS_DIR` — the fixture workspace's per-env bare origins). Parallel envs isolate with zero port collisions. `blizzard hub` (P5) and `blizzard runner` (P6) are reserved slots in the manifests — declared but empty, so still **gaps** until those phases fill them. |
+| tool:mock-fleet | The `blizzard-mock` fleet. **As of P4** the mock GitHub forge (bare git repos, `blizzard-mock-forge`), the fixture-workspace scaffold, and the mock coding harness (prompt-is-the-program, `mock-claude-code`/`mock-codex`/`mock-opencode`) are built and bound at the seams so a scenario runs with no tokens or network. The **mock hub** and **mock runner** — the counterpart mocks the daemons are built against — remain **gaps** until the daemons need them (P5/P6). |
+| tool:mock-data | The mock-data CLI (`blizzard-mock-data`) — seed the hub and runner stores into a known world for the upper tiers and the crash sweep. The CLI **skeleton** is built (P4); it **grows alongside the domain models it operates on**, so seeding real store state is a **Gap (P5+)** until those models exist. |
+| tool:fixture-workspace | The fixture-workspace scaffold (`blizzard-mock-fixture`) — mints bare `file://` origins plus a generated, disposable winter workspace, the environment the service and e2e tiers and the sweep run against. **Built (P4).** |
 
 ## See also
 
