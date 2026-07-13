@@ -1,0 +1,60 @@
+# Crash correctness
+
+MVP acceptance criterion 4 promises that `kill -9` at every step boundary is **a tested operation, not a hope**.
+That promise imposes four requirements on daemon code — built in from the first commit, because each is cheap on day one and expensive to retrofit.
+Crash correctness is an orthogonal dimension, not a fifth test tier ([../verification/blizzard.md](../verification/blizzard.md)): the requirements below are *architecture*; the kill-9 sweep that exercises them is a verification method (`blizzard:crash-sweep`) in the matrix.
+Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`canon:rule-shape`).
+
+## A steppable loop (`bzh:steppable-loop`)
+
+**Rule.** The daemon loop's phases — the runner's REAP, PULL, FILL, ADVANCE, and the hub's coordinator loop — are individually callable step functions, each a pure function of (store, clock, seam clients); the tick timer is merely one driver of them.
+
+**Why.** Tests drive the same step functions directly, one at a time, stopping exactly at a boundary — which is how boundary-order and recovery logic get cheap in-process coverage and how the sweep arms a precise crash point. A loop welded to its timer can only be tested by waiting on wall-clock ticks and cannot be stopped mid-step.
+
+**Detect.** Loop phases reachable only through the tick timer or a `while True`; a step that reads the clock or a seam from a module global rather than its parameters.
+
+**Do.** `def fill(store, clock, seams) -> None` callable standalone; the tick driver calls `reap`, `pull`, `fill`, `advance` in turn.
+
+**Don't.** A single `tick()` that inlines all four phases with no separately callable boundary — no test can stop between FILL and ADVANCE.
+
+## An injected clock (`bzh:injected-clock`)
+
+**Rule.** All time flows through a clock abstraction wired at the composition root (`bzh:dependency-injection`); no direct `time.time()` / `datetime.now()` appears in loop, store, or domain code — **including SQLAlchemy column defaults**.
+
+**Why.** An injected clock lets tests advance time virtually, so lease TTLs, reap staleness thresholds, and an "overnight" wait pass in milliseconds and deterministically; a direct `datetime.now()` anywhere — especially a column default — reintroduces wall-clock non-determinism the sweep cannot control.
+
+**Detect.** `datetime.now()`, `datetime.utcnow()`, `time.time()`, or `func.now()` / `server_default=func.now()` in loop, store, domain, or model code; a timestamp written from anything but the injected clock.
+
+**Do.** The clock is injected; timestamps come from `clock.now()`, and column values are set by the writing code from that clock — not by a database default.
+
+**Don't.** `created_at = Column(DateTime, default=datetime.utcnow)` — the store now stamps wall-clock time the virtual clock can't move.
+
+## A crash-point registry (`bzh:crash-point-registry`)
+
+**Rule.** The dangerous windows carry stable names in a code-owned, **enumerable** registry — e.g. `fill.after-env-acquire.before-claim`, `advance.after-buffer.before-flush`, `deliver.after-repo-land`, `reap.after-kill.before-expire`; under test scaffolding a daemon subprocess SIGKILLs itself on reaching the armed point, selected via an environment variable and fenced so it can never fire outside a test-marked environment.
+
+**Why.** An enumerable registry is what the sweep iterates — one run per armed point — and it doubles as the authoritative list of windows the design claims are safe, so a newly-introduced dangerous window is a registry entry, not a silent gap. The self-fencing (same convention as the mock harness) guarantees the kill can never fire in production.
+
+**Detect.** A crash-recovery claim about a window with no corresponding registry entry; a self-kill hook not gated behind the test-environment fence; crash points hard-coded in the test rather than enumerated from the registry.
+
+**Do.** Add the window's stable name to the registry; the sweep enumerates the registry and arms each in turn; the daemon self-kills only when the test fence is set.
+
+**Don't.** Assert a window is crash-safe in prose without a registry entry the sweep can arm — the claim is untested.
+
+## A facts-level invariant checker (`bzh:invariant-checker`)
+
+**Rule.** A checker of assertions evaluated over both stores' facts after any crash → restart → recover cycle holds the durable invariants: no duplicate env binding, at most one accepted transition per node-step epoch, no double delivery with per-repo lands idempotent, every derived status computable with exactly one match, and a gapless outbound-buffer sequence.
+
+**Why.** Because both stores are facts-only (`bzh:facts-not-status`), the checker is essentially a library of SQL assertions plus the status-derivation queries themselves — and a failure names the exact violated invariant rather than a vague corruption. It is the assertion the sweep runs after every armed crash, alongside the scenario's own expected outcome.
+
+**Detect.** A crash test that asserts only "the process restarted" or "the chunk eventually landed" without checking the facts-level invariants; a new durable invariant added to the design with no assertion in the checker.
+
+**Do.** After restart-and-recover, run the checker's SQL assertions over both stores; a violation reports which invariant broke.
+
+**Don't.** Rely on the scenario's happy-path outcome alone — a double-delivery or duplicate-binding bug can leave the chunk looking landed while an invariant is silently violated.
+
+## See also
+
+- [./system-shape.md](./system-shape.md) — `bzh:facts-not-status` and `bzh:deterministic-shell`, the invariants these requirements rest on.
+- [../verification/blizzard.md](../verification/blizzard.md) — `blizzard:crash-sweep`, the method that composes the four requirements into the criterion-4 proof, and the division of labor with the unit and component tiers.
+- The discovery corpus (`blizzard-discovery` repo, `implementation/crash-testing.md`) — the sweep procedure and the `D-007`/`D-036`/`D-057`/`D-069` invariants in full.

@@ -1,0 +1,9 @@
+name = "blizzard-harness"
+prefix = "bzh"
+
+# blizzard-harness is blizzard's instance of a harness. It derives from
+# winter-canon — the universal substrate every harness builds on — so it
+# declares that dependency, keeping winter-canon strictly below it in the
+# graph. Its conventions are addressed via the `blizzard-harness:` path
+# notation (e.g. `blizzard-harness:/architecture/repository-access.md`).
+requires = ["winter-canon"]
