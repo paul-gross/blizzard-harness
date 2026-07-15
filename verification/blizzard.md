@@ -1,4 +1,4 @@
-# Verifiability matrix — blizzard
+# Verifiability matrix — blizzard (`bzh:verifiability-matrix`)
 
 An inventory of the verification methods for the blizzard ecosystem — each entry one way a skill or agent may assert a blizzard change is correct.
 Conforms to the canon concept at `winter-canon:/verifiability-matrix.md`.
