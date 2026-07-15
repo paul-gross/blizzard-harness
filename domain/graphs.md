@@ -1,0 +1,71 @@
+# Workflow graphs
+
+The definition chunks travel: graphs, nodes, edges, judgements, and choices.
+Definitions, with the enforceable invariant written in the slot skeleton owned by `winter-canon:/rule-shape.md` (`canon:rule-shape`).
+Part of the [domain model](./index.md).
+
+## Graph
+
+One identity, two parts:
+
+- **An immutable definition** — the nodes, edges, prompts, and judgements. Every edit creates a new graph; an existing definition never changes, so anything pinned to it can trust it forever.
+- **Mutable operational metadata beside it** — `enabled`, the auto-migrate policy, and the migration-target pointer. The metadata is the graph's only mutable surface.
+
+There is **no graph family or version tree**: graphs are standalone, and any graph may migrate its chunks to any graph so long as the node mapping gets them over.
+What looks like "versions of a workflow" is emergent — a chain of migration-target pointers between graphs that happen to share a name.
+
+- **`enabled` gates exactly one thing: being auto-migrated *to*.** While a graph is disabled no chunk drifts into it — and nothing else changes: its own chunks continue, explicit requests may still target it. Graphs are created enabled.
+- **The migration target may point anywhere.** Ordinarily the graph's re-published successor; pointing at a differently-named graph retires this workflow into another one.
+
+## Node
+
+One station in one graph — "build", "review", "deliver".
+A node belongs to exactly one immutable graph; same-named nodes in different graphs are distinct nodes correlated only by name.
+There is no node *type*: what a type would encode is structural — a gate is a node whose judgement is human-judged, and delivery is a node the hub itself executes.
+
+| Facet | Meaning |
+|-------|---------|
+| name | The cross-graph correlator — what migration landing, artifact series, and runner-side gate configuration key on. |
+| executor | Who runs the node's steps: a runner (the default), or the hub itself — delivery is the first hub-executed node. |
+| prompt | The node's invariant identity — what a worker at this station is asked to do; the arriving edge contributes arrival context on top. |
+| checks | The deterministic checks (tests, lint) whose results inform the exit judgement. |
+| judgement | How the node's exit is judged and the choices it can produce — see [Judgement and choices](#judgement-and-choices). |
+| retries | The bounded failure budget — crashes, verdict-less exits, reaps — and where exhaustion escalates; a *judged* failure edge never consumes it. |
+| produces | The artifact names the node is expected to submit ([artifacts.md](./artifacts.md)). |
+| session | Whether the node's steps resume the chunk's agent session or start cold — resumed by default; review-style nodes opt into cold eyes. |
+
+## Edge
+
+A directed, outcome-keyed connection between two nodes of the **same graph** — cross-graph movement is a migration, never an edge (`bzh:migration-not-transition` in [work.md](./work.md)).
+
+- **Keyed by exactly one choice** of the source node's judgement, and every choice a judgement can produce has exactly one edge — resolution is checked when the graph is created, so an edge can never dangle and a judgement can never select nothing.
+- **Exactly one entry node** per graph; **cycles are intentional** — build → review → build is the shape, not a validation error.
+- An edge carries **arrival context**: prose appended to the target node's prompt so the worker knows how it got there.
+
+## Judgement and choices
+
+The evaluation at a node's exit that selects the outgoing edge.
+
+- **Judged by the worker** (the default): elicited when the worker declares done, informed by the checks it ran; the worker selects exactly one of the node's choices. A missing or unparseable selection is a **failure, not a judgement** — it consumes a retry rather than an edge.
+- **Judged by a human**: the structural mark of a gate — the person renders the judgement by picking from the same choices, presented as buttons ([humans.md](./humans.md)).
+- **Judged by machinery** at hub-executed nodes — e.g. delivery selecting landed or conflicted ([artifacts.md](./artifacts.md)).
+
+A **choice** is one selectable outcome of one node's judgement, scoped to that judgement — never a global registry: `pass` in build and `pass` in review are different choices that happen to share a name.
+Each choice keys exactly one outgoing edge; its description is what sharpens a worker's judgement and what a gate renders as button text.
+
+## Ids are exact, names correlate (`bzh:ids-exact-names-correlate`)
+
+**Rule.** Exact references — a transition's nodes, an artifact's provenance, an edge's choice — carry **ids**, which pin one immutable definition; continuity across graphs — migration landing, artifact series, runner-side gate selection — keys on **names**. Never the reverse.
+
+**Why.** An id names exactly one thing in exactly one immutable graph, so an exact reference can never dangle or drift; a name is the only thing same-purpose entities in different graphs share, so it is the only key correlation can use.
+
+**Detect.** A design that matches an exact reference by name — two graphs' `build` nodes conflated — or that correlates across graphs by id, such as a migration expecting the target graph to contain the same node id.
+
+**Do.** A transition records the exact ids of its two nodes; a deferred migration lands the chunk on the target graph's node whose *name* matches the one it left.
+
+**Don't.** Key an artifact series on the node id — the series would break at every migration or re-published graph, though the work is the same station's.
+
+## See also
+
+- [./work.md](./work.md) — the chunk that travels this definition, and the migration that moves it between definitions.
+- The discovery corpus (`blizzard-discovery` repo, `design/domain/graph.md`, with the engine in `design/workflow-engine.md` and the authoring schema in `design/hub/graph-schema.md`) — the property tables and the `D-025`/`D-032`/`D-033`/`D-038`/`D-039`/`D-040`/`D-041`/`D-042` decisions this file derives from.

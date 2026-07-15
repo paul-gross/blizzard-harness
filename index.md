@@ -20,6 +20,7 @@ Ids are stable: citations depend on them, so renaming or removing a rule's id is
 
 | Domain | When to read |
 |--------|--------------|
+| [domain/](./domain/index.md) | Establishing or asserting correctness of behavior — planning against what blizzard's concepts are and how they behave, or reviewing and verifying work against that model, with no technical detail |
 | [architecture/](./architecture/index.md) | Planning a change to blizzard's structure, or reviewing a plan — the CLEAN layering, repository access, the deterministic-shell/pluggable-seam shape, and the crash-correctness requirements the daemons are built to honor |
 | [standards/](./standards/index.md) | Writing or reviewing finished code — the Python and Angular toolchains, logging, persistence, and the generated client a change is held to |
 | [verification/](./verification/index.md) | Planning how a change will be proven, or verifying one — the verifiability matrix: the four test tiers, tier rules, and the per-component commands |
@@ -28,9 +29,8 @@ Ids are stable: citations depend on them, so renaming or removing a rule's id is
 
 ## Domains not yet present
 
-The canonical harness domain set (`winter-canon:/harness-structure.md`) also names `domain/`, `workflows/`, and `tooling/`.
+The canonical harness domain set (`winter-canon:/harness-structure.md`) also names `workflows/` and `tooling/`.
 These are **gaps**, named here rather than silently omitted:
 
-- **`domain/`** — the business/domain model with no technical detail. Its content lives today in the discovery corpus (`blizzard-discovery` repo, `domain/` and the decision log); it graduates into this harness when the model stabilizes.
 - **`workflows/`** — deterministic agentic processes toward a goal (feature delivery, release). The cross-repo delivery flow lives in `workspace:/context/project/contributing.md` and `workspace:/context/worktree-ops.md`; a blizzard-specific `workflows/` domain is unfilled.
 - **`tooling/`** — additional external tools an agent drives through the harness. Unfilled; add one when blizzard gains a tool an agent invokes beyond the winter CLI.
