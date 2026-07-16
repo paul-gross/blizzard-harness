@@ -24,4 +24,6 @@ The commands a change must pass:
 
 **Don't.** Add black or isort "as well as ruff" — ruff owns both lint and format, and a second formatter is a second opinion that fights the first.
 
-**Gap.** No `pyproject.toml` exists in the `blizzard` or `blizzard-mock` seeds yet; these commands land when the uv projects are scaffolded (phase 5). [../verification/blizzard.md](../verification/blizzard.md) tracks each as a named gap until then.
+## See also
+
+- [`./wire.md`](./wire.md) — `bzh:utc-instants`, whose fitness test (`tests/test_wire_timestamps.py`) runs under `uv run pytest` like any other unit test.

@@ -33,4 +33,6 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **Don't.** Hand-roll a request against `/api/...`, or leave the generated client out of version control — API changes then land invisibly and installs need a codegen toolchain.
 
-**Gap.** No Angular workspace, `package.json`, or openapi-ts script exists in the `blizzard` seed yet; these commands land when the frontend is scaffolded (phase 5). [../verification/blizzard.md](../verification/blizzard.md) tracks each as a named gap until then.
+## See also
+
+- [`./wire.md`](./wire.md) — `bzh:utc-instants`. A rendered age is the frontend's half of that rule: a browser's clock is not the hub's, so a derived age must tolerate a bounded skew and then fall through to the liveness the backend already derived, never clamp a large negative to a confident zero.

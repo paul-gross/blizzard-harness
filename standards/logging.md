@@ -23,5 +23,3 @@ No `print()` in daemon or service code — use the injected reporter for user-fa
 **Do.** `log.info("chunk delivered", chunk_id=chunk.id, repo=repo.name)` — the event as the message, the context as fields; renderer chosen by config.
 
 **Don't.** `log.info(f"chunk {chunk.id} delivered to {repo.name}")` — the fields are now trapped in the string, and no consumer can filter on them.
-
-**Gap.** structlog is not yet wired in the `blizzard` seed; the configuration-selected renderer and the call-site convention land with the app scaffold (phase 5).

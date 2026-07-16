@@ -34,4 +34,6 @@ sqlite is the fast local default and what tests run against; postgres support is
 
 **Don't.** Auto-migrate on boot, or ship a revision whose `downgrade()` is a stub — an unattended migration can corrupt data, and a stubbed downgrade makes a rollback impossible.
 
-**Gap.** No Alembic trees, `blizzard` CLI, or store schemas exist in the seed yet; the `init`/`migrate` verbs and the startup revision check land with the app scaffold (phase 5).
+## See also
+
+- [`./wire.md`](./wire.md) — `bzh:utc-instants`, the `UtcDateTime` column type that keeps every `DateTime`-family column inside this file's portable-SQL rule while making instants UTC-aware.
