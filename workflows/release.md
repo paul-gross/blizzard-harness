@@ -2,13 +2,13 @@
 
 **Rule.** Cut a blizzard release by pushing a `v*` tag at a proven-green `master` tip — pushing the tag *is* the release, and no other path publishes a build.
 
-**Why.** The branch-and-release model is trunk-based with milestones as tags (owned by the `blizzard-discovery` repo, `implementation/build.md` §Branch and release model): the tag triggers the `release` workflow, which runs the full verification suite, builds the wheel with the embedded frontend, and publishes it as a GitHub Release — so the sequence below is the whole ceremony.
+**Why.** The branch-and-release model is trunk-based with milestones as tags: the tag triggers the `release` workflow, which runs the full verification suite, builds the wheel with the embedded frontend, and publishes it as a GitHub Release — so the sequence below is the whole ceremony. (The model was first designed in the discovery corpus, `blizzard-discovery` repo `implementation/build.md` §Branch and release model — history, not authority.)
 
 ## The sequence
 
 1. **Confirm `master` is green.** The `push`-workflow run for the tip you will tag passed (`blizzard:ci`, [../verification/blizzard.md](../verification/blizzard.md)), and your worktree sits at exactly that commit — nothing local, nothing unpushed.
 2. **Rehearse the release-only and local-only tiers.** The tag run is the only remote execution of the e2e tier and the FULL crash sweep (`blizzard:e2e`, `blizzard:crash-sweep`) — run them locally first so the tag build is never the first execution of either. Run the capstone journey (`blizzard:journey`) too: no CI workflow runs it, so this rehearsal is its only pre-release execution.
-3. **Pick the version.** `0.<milestone>.<patch>` pre-1.0, candidates as `-rc.N` — the versioning policy is owned by `implementation/build.md`; the tag is the version prefixed with `v`.
+3. **Pick the version.** `0.<milestone>.<patch>` pre-1.0, candidates as `-rc.N`; the tag is the version prefixed with `v`. That is the whole policy — this step owns it.
 4. **Tag and push the tag.**
 
    ```bash
