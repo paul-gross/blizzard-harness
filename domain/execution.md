@@ -8,9 +8,9 @@ Part of the [domain model](./index.md).
 
 - **The hub** orchestrates the fleet's work: it owns chunks, graphs, artifacts, and the registry, and it grants work. It never holds code or transcripts (`bzh:never-code` in [artifacts.md](./artifacts.md)) and never reaches into a runner's machine.
 - **A runner** executes work on its own machine, bound to one prepared workspace: it claims chunks, acquires environments, drives workers through node-steps, and reports the facts. All contact is runner-initiated — the hub pushes nothing into a dev box.
-- **Operator controls are declarative state, not commands.** Pausing a runner appends a fact the runner reads and adheres to on its own contact — new leases stop, in-flight chunks run to completion. There is no directive queue.
+- **Operator controls are declarative state, not commands.** Pausing appends a fact; new leases stop, in-flight chunks run to completion. There is no directive queue. Pause has **two independent brakes** (D-105), because two parties stop a runner for different reasons: the **fleet's**, set at the hub and read by the runner on its own contact, and the runner's **own**, set on its machine — so it holds with the hub unreachable — and reported up to the hub, which never sets it. Either stops new leases: effective paused is their OR, and each is cleared only where it was set.
 
-A runner's registry entry derives everything observable: liveness derives from its most recent contact, and paused-ness from the newest pause/resume fact — never stored flags (`bzh:facts-not-status` in [../architecture/system-shape.md](../architecture/system-shape.md)).
+A runner's registry entry derives everything observable: liveness derives from its most recent contact, and each brake from the newest fact in its own stream — never stored flags (`bzh:facts-not-status` in [../architecture/system-shape.md](../architecture/system-shape.md)).
 
 ## Acquisition and the route
 
