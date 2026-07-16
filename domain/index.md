@@ -4,8 +4,8 @@ Blizzard's **domain model**: what the concepts are, how they behave, and how the
 Conforms to the `domain/` slot of the canon harness shape (`winter-canon:/harness-structure.md`).
 This is the correctness reference: read it when planning a change against intent, or when reviewing or verifying behavior against the model — where the companion [architecture/](../architecture/index.md) domain governs how the *code* is structured, this domain governs how the *concepts* work.
 
-The model is distilled from the discovery corpus (`blizzard-discovery` repo), which remains the design source of truth: the corpus owns the property-level design detail and the decision provenance (`D-xxx`), and each file here names its corpus counterpart in its See also.
-This domain owns the behavioral statement an agent plans and reviews against; where the two ever disagree, the corpus decision log wins and this domain is the file to fix.
+The model was distilled from the discovery corpus (`blizzard-discovery` repo), which is the historical record blizzard was built from — worth reading for the property-level design detail and the decision provenance (`D-xxx`) behind a shape, and each file here names its corpus counterpart in its See also.
+The corpus is **not maintained** and is not a source of truth: it is a snapshot of what was once intended. This domain owns the behavioral statement an agent plans and reviews against; where the two disagree, **this domain wins** if it matches the code, and the corpus is simply out of date. Do not record a decision there to settle it.
 
 Parent: [../index.md](../index.md).
 

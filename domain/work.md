@@ -18,7 +18,7 @@ The hub's unit of orchestrated work: it wraps one or more backlog items from the
 
 The derived conditions a chunk can be in.
 A chunk has exactly one status at a time — the conditions are checked in a fixed precedence, and none is ever a stored column.
-The exact fact vocabulary and derivation queries are owned by the corpus (`blizzard-discovery` repo, `design/domain/events.md`); this table is the behavioral meaning.
+The exact fact vocabulary and derivation queries live in the code; the corpus (`blizzard-discovery` repo, `design/domain/events.md`) sketches them as first designed. This table is the behavioral meaning.
 
 | Status | Meaning |
 |--------|---------|
