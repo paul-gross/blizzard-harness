@@ -6,16 +6,17 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 ## Stay inside SQLAlchemy's portable surface (`bzh:sql-portable`)
 
-**Rule.** The hub store and the runner store each run on **sqlite or postgres**, selected by configuration; neither daemon may depend on backend-specific behavior.
+**Rule.** The hub store and the runner store each run on **sqlite or postgres**, selected by configuration; neither daemon may depend on backend-specific behavior, in **syntax or in result determinism**.
 sqlite is the fast local default and what tests run against; postgres support is held by staying inside SQLAlchemy's portable surface — **not** by a second test matrix.
+A select whose consumer depends on the result's row order — an index into it, a "newest"/"oldest" read — carries an explicit total `order_by` on the query itself; an unordered select is not made portable by parsing on both backends when only one of them returns it in a determinate order.
 
-**Why.** One portable schema means postgres support costs a configuration switch, not a duplicated test suite, and the fast sqlite default keeps the local and CI loops cheap. A backend-specific feature (a postgres-only type, a sqlite-only pragma relied on for correctness) forks the schema and forces the second matrix the rule exists to avoid.
+**Why.** One portable schema means postgres support costs a configuration switch, not a duplicated test suite, and the fast sqlite default keeps the local and CI loops cheap. sqlite's incidental rowid order coincides with insertion order, though, so a select missing a real `order_by` still comes back in the order its rows were written — no sqlite-backed test can tell that apart from a query that ordered them on purpose, and only postgres's unordered contract exposes the gap.
 
-**Detect.** A dialect-specific column type, function, or `text()` SQL that only one backend supports; a test asserting behavior that holds on postgres but not sqlite (or vice versa); a code path branching on the configured backend.
+**Detect.** A dialect-specific column type, function, or `text()` SQL that only one backend supports; a test asserting behavior that holds on postgres but not sqlite (or vice versa); a code path branching on the configured backend; a select whose consumer indexes into the result (`[-1]`, `[0]`) or otherwise assumes an order, with no explicit total `order_by` on the query itself.
 
-**Do.** Model with SQLAlchemy's portable types and expressions; run tests against sqlite; treat postgres as the same schema under a different URL.
+**Do.** Model with SQLAlchemy's portable types and expressions; run tests against sqlite; treat postgres as the same schema under a different URL; give a select an explicit `order_by` whenever its consumer depends on the result's order — `select(s.chunk_pause_facts).where(...).order_by(s.chunk_pause_facts.c.id)`, the query `chunk_store.load_facts` uses for the pause fact a consumer reads as "newest" via `[-1]`.
 
-**Don't.** Reach for a postgres-only type or a sqlite-only pragma that changes correctness — the schema is no longer one portable surface and now needs two test runs.
+**Don't.** Reach for a postgres-only type or a sqlite-only pragma that changes correctness — the schema is no longer one portable surface and now needs two test runs. Drop the `order_by` from a select whose consumer indexes `[-1]`/`[0]` or otherwise assumes an order — sqlite's rowid order hides the omission, postgres does not.
 
 ## Migrations are manual, Alembic, CLI-driven (`bzh:manual-migrations`)
 
