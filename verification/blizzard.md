@@ -66,7 +66,13 @@ The mocks the upper tiers bind are owned by `blizzard-mock` (P4); the tier *rule
   grep -rn '<old-testid>\|<old-field>' tests/e2e/ tests/service/ tests/journey/ tests/crash/
   ```
 
-  The browser scenario needs `mise run web-build` first, or it drives the unbuilt placeholder and fails before its first assertion. This is a rule rather than a note because the same blind spot has landed twice.
+  That grep catches a handle you **removed**. A handle you **added** breaks these tiers just as hard and the grep is blind to it: a `data-testid` is only a usable locator while exactly one component renders it, so a second component claiming an existing name makes every `get_by_test_id` for it ambiguous and the scenario dies on `strict mode violation: … resolved to 2 elements`. A new component that renders a concept an existing one already renders (the same chunk's open question, in a rail *and* in the detail dock) is the case to watch — give it its own prefixed handles. Check a new handle is unique before you add it:
+
+  ```bash
+  grep -rn 'data-testid="<new-testid>"' web/projects/   # expect exactly one component
+  ```
+
+  The browser scenario drives the **built** bundle `blizzard hub host` serves out of `src/blizzard/static/`, never the sources. `mise run e2e` therefore `depends = ["web-build"]` — do not reach past it with a bare `pytest tests/e2e/`. The hazard is not the unbuilt tree (that fails loudly, before the first assertion); it is a bundle that is **present but stale**, which fails *quietly* — the scenario exercises the previous UI and can go **green against a layout that no longer exists**, reporting coverage of a change it never loaded. This is a rule rather than a note because the same blind spot has landed three times, most recently against a board-layout rewrite whose geometry assertion would have passed against the old layout had a second, unrelated failure not tripped first.
 
 - **A red drift check means stage the regenerated output, not the check is noisy — never substitute `lint`/`test` for it (`bzh:drift-stage-not-route-around`).** `web:client-drift` and the OpenAPI half of `blizzard:gate` diff the working tree against the index, not against `HEAD`, so `git add` the regenerated `openapi/` and `web/` output before running the gate — an *unstaged* regeneration is what fails, not an uncommitted one. `npm run lint` and `npm run test` type-check and unit-test different surfaces; neither exercises codegen, so substituting them for a red drift step reports coverage the gate never ran and leaves the drift unguarded. This is a rule rather than a note because the same blind spot has landed at least three times in one build, once as exactly that substitution.
 
