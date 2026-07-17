@@ -31,15 +31,15 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 ## A crash-point registry (`bzh:crash-point-registry`)
 
-**Rule.** The dangerous windows carry stable names in a code-owned, **enumerable** registry — e.g. `fill.after-env-acquire.before-claim`, `advance.after-buffer.before-flush`, `deliver.after-repo-land`, `reap.after-kill.before-expire`; under test scaffolding a daemon subprocess SIGKILLs itself on reaching the armed point, selected via an environment variable and fenced so it can never fire outside a test-marked environment.
+**Rule.** The dangerous windows carry stable names in a code-owned, **enumerable** registry — e.g. `fill.after-env-acquire.before-claim`, `advance.after-buffer.before-flush`, `deliver.after-repo-land`, `reap.after-kill.before-expire`; under test scaffolding a daemon subprocess SIGKILLs itself on reaching the armed point, selected via an environment variable and fenced so it can never fire outside a test-marked environment. The segment before the point's first `.` is the **boundary family** the sweep partitions the registry on — it resolves which scenario (the generic `build → deliver` sweep, or a dedicated scenario such as `resume.`, `abandon.`, `pause.`) is the one that arms and reaches that point — so name a point for the boundary its reaching scenario opens, never for the step whose source happens to call `.reached()`.
 
-**Why.** An enumerable registry is what the sweep iterates — one run per armed point — and it doubles as the authoritative list of windows the design claims are safe, so a newly-introduced dangerous window is a registry entry, not a silent gap. The self-fencing (same convention as the mock harness) guarantees the kill can never fire in production.
+**Why.** An enumerable registry is what the sweep iterates — one run per armed point — and it doubles as the authoritative list of windows the design claims are safe, so a newly-introduced dangerous window is a registry entry, not a silent gap. The family prefix is what routes a point to the scenario that actually reaches its window, so naming it for the wrong family leaves the registry entry with no real coverage behind it.
 
-**Detect.** A crash-recovery claim about a window with no corresponding registry entry; a self-kill hook not gated behind the test-environment fence; crash points hard-coded in the test rather than enumerated from the registry.
+**Detect.** A crash-recovery claim about a window with no corresponding registry entry; a self-kill hook not gated behind the test-environment fence; crash points hard-coded in the test rather than enumerated from the registry; a new point prefixed with a family that already has coverage from an unrelated sibling point, when the point's own window only opens under a dedicated scenario — the family-coverage check passes on the sibling's strength while the new point's window goes unswept.
 
-**Do.** Add the window's stable name to the registry; the sweep enumerates the registry and arms each in turn; the daemon self-kills only when the test fence is set.
+**Do.** Add the window's stable name to the registry, prefixed for the scenario that reaches it — `pause.after-kill.before-park`, not `pull.after-pause-kill.before-park`, even though the call site sits inside the PULL step's code; the sweep enumerates the registry and arms each in turn; the daemon self-kills only when the test fence is set.
 
-**Don't.** Assert a window is crash-safe in prose without a registry entry the sweep can arm — the claim is untested.
+**Don't.** Assert a window is crash-safe in prose without a registry entry the sweep can arm — the claim is untested. Prefix a new point `pull.after-pause-kill.before-park` because that's where its `.reached()` call sits, instead of `pause.after-kill.before-park` for the scenario whose window it actually guards.
 
 ## A facts-level invariant checker (`bzh:invariant-checker`)
 
