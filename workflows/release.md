@@ -2,7 +2,7 @@
 
 **Rule.** Cut a blizzard release by pushing a `v*` tag at a proven-green `master` tip — pushing the tag *is* the release, and no other path publishes a build.
 
-**Why.** The branch-and-release model is trunk-based with milestones as tags: the tag triggers the `release` workflow, which runs the full verification suite, builds the wheel with the embedded frontend, and publishes it as a GitHub Release — so the sequence below is the whole ceremony. (The model was first designed in the discovery corpus, `blizzard-discovery` repo `implementation/build.md` §Branch and release model — history, not authority.)
+**Why.** The branch-and-release model is trunk-based with milestones as tags: the tag triggers the `release` workflow, which runs the full verification suite, builds the wheel with the embedded frontend, and publishes it as a GitHub Release — so the sequence below is the whole ceremony.
 
 ## The sequence
 
@@ -17,7 +17,7 @@
    ```
 
 5. **Watch the release run and verify the publish.** Watch the `release.yml` run to green (`blizzard:ci`), then confirm the GitHub Release exists with the wheel attached: `gh release view v0.1.0 --repo paul-gross/blizzard`.
-6. **Repair forward.** A red release run is fixed on `master` and cut again as the next tag (`-rc.N+1`, or the next patch) — a pushed tag is immutable. A fix to an already-released milestone after `master` has moved on follows the lazy backport-branch policy owned by `implementation/build.md`.
+6. **Repair forward.** A red release run is fixed on `master` and cut again as the next tag (`-rc.N+1`, or the next patch) — a pushed tag is immutable.
 
 **Gap.** No `v*` tag has yet exercised the `release` workflow end to end (the matrix names this open piece — [../verification/blizzard.md](../verification/blizzard.md)); the first cut also verifies the release pipeline itself, so shepherd it rather than fire-and-forget.
 

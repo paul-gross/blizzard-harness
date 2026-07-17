@@ -66,4 +66,3 @@ The envelope is also how change reaches a worker rather than being inferred: a m
 
 - [./work.md](./work.md) — the transitions these leases produce and the statuses tenure derives.
 - [../architecture/crash-correctness.md](../architecture/crash-correctness.md) — how the daemons are built and tested so these semantics survive `kill -9`.
-- The discovery corpus (`blizzard-discovery` repo, `design/domain/fleet.md`, with the loop in `design/runner/loop.md`, the machine-local facts in `design/runner/store.md`, and the worker spawn in `design/harness-adapters.md`) — the property tables and the `D-007`/`D-021`/`D-024`/`D-027`/`D-035`/`D-038`/`D-043`/`D-044`/`D-049`/`D-063`/`D-072`/`D-080`/`D-082`/`D-088` decisions this file derives from.

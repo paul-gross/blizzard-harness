@@ -57,4 +57,3 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 - [./system-shape.md](./system-shape.md) — `bzh:facts-not-status` and `bzh:deterministic-shell`, the invariants these requirements rest on.
 - [../verification/blizzard.md](../verification/blizzard.md) — `blizzard:crash-sweep`, the method that composes the four requirements into the criterion-4 proof, and the division of labor with the unit and component tiers.
-- The discovery corpus (`blizzard-discovery` repo, `implementation/crash-testing.md`) — the sweep procedure and the `D-007`/`D-036`/`D-057`/`D-069` invariants in full.

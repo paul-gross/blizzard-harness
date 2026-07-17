@@ -1,7 +1,7 @@
 # Frontend toolchain
 
 The lint, format, test, and API-client conventions the Angular apps are held to.
-The framework and library *choices* (Angular, CDK, TanStack Query, signals, SSE) are settled — what the apps are built on, readable from the code itself; the discovery corpus records why they were picked (`blizzard-discovery` repo, `implementation/tech-stack.md`, D-096/D-097 — history, not authority). This file owns the enforceable toolchain and client rules.
+The framework and library *choices* (Angular, CDK, TanStack Query, signals, SSE) are settled — what the apps are built on, readable from the code itself, and not revisited here. This file owns the enforceable toolchain and client rules.
 Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`canon:rule-shape`).
 
 ## eslint, no prettier, vitest (`bzh:frontend-toolchain`)

@@ -18,7 +18,7 @@ The hub's unit of orchestrated work: it wraps one or more backlog items from the
 
 The derived conditions a chunk can be in.
 A chunk has exactly one status at a time — the conditions are checked in a fixed precedence, and none is ever a stored column.
-The exact fact vocabulary and derivation queries live in the code; the corpus (`blizzard-discovery` repo, `design/domain/events.md`) sketches them as first designed. This table is the behavioral meaning.
+The exact fact vocabulary and derivation queries live in the code. This table is the behavioral meaning.
 
 | Status | Meaning |
 |--------|---------|
@@ -67,4 +67,3 @@ The explicit re-pin of a chunk from one immutable graph to another.
 
 - [./graphs.md](./graphs.md) — the immutable definition a chunk travels and the metadata its auto-migration derives from.
 - [./execution.md](./execution.md) — who holds a chunk, the lease behind each node-step attempt, and the epoch its transitions are fenced by.
-- The discovery corpus (`blizzard-discovery` repo, `design/domain/work.md` and `design/domain/events.md`) — the property tables, fact vocabulary, and derivation queries, and the `D-004`/`D-024`/`D-027`/`D-033`/`D-034`/`D-037`/`D-045`/`D-047`/`D-067` decisions this file derives from.

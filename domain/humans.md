@@ -52,4 +52,3 @@ A person may enter a parked chunk's session interactively; the entry and exit ar
 
 - [./work.md](./work.md) — the statuses these entries derive and the transition a resolved decision becomes.
 - [./execution.md](./execution.md) — the lease kept dormant while a chunk parks, and the reap clock these entries stop.
-- The discovery corpus (`blizzard-discovery` repo, `design/domain/questions.md` and `design/ask-answer.md`, with decisions and gates in `design/domain/work.md`) — the property tables and protocol, and the `D-009`/`D-032`/`D-041`/`D-042`/`D-045`/`D-067` decisions this file derives from.

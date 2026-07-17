@@ -50,4 +50,3 @@ The **merge queue** is the hub's single-writer delivery lane: the hub-executed d
 ## See also
 
 - [./work.md](./work.md) — the transition an artifact commits with, and the `done` status delivery derives.
-- The discovery corpus (`blizzard-discovery` repo, `design/domain/artifacts.md`) — the property tables and storage model, and the `D-012`/`D-026`/`D-030`/`D-036`/`D-057`/`D-059`/`D-060`/`D-065`/`D-091` decisions this file derives from.

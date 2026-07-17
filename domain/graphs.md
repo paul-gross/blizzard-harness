@@ -68,4 +68,3 @@ Each choice keys exactly one outgoing edge; its description is what sharpens a w
 ## See also
 
 - [./work.md](./work.md) — the chunk that travels this definition, and the migration that moves it between definitions.
-- The discovery corpus (`blizzard-discovery` repo, `design/domain/graph.md`, with the engine in `design/workflow-engine.md` and the authoring schema in `design/hub/graph-schema.md`) — the property tables and the `D-025`/`D-032`/`D-033`/`D-038`/`D-039`/`D-040`/`D-041`/`D-042` decisions this file derives from.

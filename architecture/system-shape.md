@@ -47,4 +47,3 @@ A chunk's **status** is always *derived* by query from those facts, never writte
 
 - [./crash-correctness.md](./crash-correctness.md) — the four daemon requirements built on `bzh:facts-not-status` and `bzh:deterministic-shell`.
 - [../standards/persistence.md](../standards/persistence.md) — `bzh:sql-portable`, the portable-SQL rule the facts-only stores are held to.
-- The discovery corpus (`blizzard-discovery` repo, `design/architecture.md` §"Store facts, derive status" and §"Interaction rules") — the running-pieces detail and the `D-004`/`D-016`/`D-023` decisions these invariants derive from.

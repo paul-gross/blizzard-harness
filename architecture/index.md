@@ -18,4 +18,3 @@ Parent: [../index.md](../index.md).
 ## See also
 
 - [../verification/blizzard.md](../verification/blizzard.md) — how the guidance here is proven: the test tiers and the kill-9 sweep that exercises the crash-correctness requirements.
-- The discovery corpus (`blizzard-discovery` repo, `design/architecture.md`) — the running-pieces map and the decision-log entries (`D-xxx`) these invariants derive from.
