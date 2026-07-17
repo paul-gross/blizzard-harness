@@ -8,7 +8,7 @@ Part of the [domain model](./index.md).
 
 - **The hub** orchestrates the fleet's work: it owns chunks, graphs, artifacts, and the registry, and it grants work. It never holds code or transcripts (`bzh:never-code` in [artifacts.md](./artifacts.md)) and never reaches into a runner's machine.
 - **A runner** executes work on its own machine, bound to one prepared workspace: it claims chunks, acquires environments, drives workers through node-steps, and reports the facts. All contact is runner-initiated — the hub pushes nothing into a dev box.
-- **Operator controls are declarative state, not commands.** Pausing appends a fact; new leases stop, in-flight chunks run to completion. There is no directive queue. Pause has **two independent brakes**, because two parties stop a runner for different reasons: the **fleet's**, set at the hub and read by the runner on its own contact, and the runner's **own**, set on its machine — so it holds with the hub unreachable — and reported up to the hub, which never sets it. Either stops new leases: effective paused is their OR, and each is cleared only where it was set.
+- **Operator controls are declarative state, not commands.** Pausing appends a fact; there is no directive queue. **Runner-level** pause has **two independent brakes**, because two parties stop a runner for different reasons: the **fleet's**, set at the hub and read by the runner on its own contact, and the runner's **own**, set on its machine — so it holds with the hub unreachable — and reported up to the hub, which never sets it. Either stops only new leases — in-flight chunks run to completion — and effective paused is their OR, each cleared only where it was set. **Per-chunk** pause is a third, independent lever targeting one chunk rather than the whole runner, and it does kill that chunk's in-flight worker while keeping its claim — see [work.md](./work.md) §Statuses (`paused`) for what survives and how resume recovers it.
 
 A runner's registry entry derives everything observable: liveness derives from its most recent contact, and each brake from the newest fact in its own stream — never stored flags (`bzh:facts-not-status` in [../architecture/system-shape.md](../architecture/system-shape.md)).
 
@@ -22,6 +22,7 @@ The environment identifier is opaque to the hub — it knows *which* environment
 
 - **Runner stickiness.** Consecutive node-steps of a chunk run on the holding runner — no re-queue between nodes.
 - **A route ends** with the chunk's terminal outcome, or by **detach**: a superadmin's forcible release, after which the chunk re-derives ready and the old runner is fenced out by the next claim.
+- **Pause is detach's deliberate counterpart: it keeps the route.** A per-chunk pause kills the chunk's live worker but leaves the lease, route, epoch, environments, and retry budget untouched, so resume respawns the session in place under the unchanged lease/epoch/session id ([work.md](./work.md) §Statuses); detach is the lever that gives the claim away, pause is the one that holds it exactly where it is.
 
 ## Lease and epoch
 

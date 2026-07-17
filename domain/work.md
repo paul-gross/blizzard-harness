@@ -27,6 +27,7 @@ The exact fact vocabulary and derivation queries live in the code. This table is
 | `delivering` | In the hub's own hands — queued for or undergoing delivery, or awaiting an external merge; the holding runner keeps its environments until the outcome is known. |
 | `waiting_on_human` | Parked on **invited** human input — an open ask or an unresolved gate decision ([humans.md](./humans.md)); the reap clock is stopped. |
 | `needs_human` | Parked on **failure** — retries exhausted, or a worker died without a verdict; a person must requeue or take over ([humans.md](./humans.md)). |
+| `paused` | Held on an operator's per-chunk pause fact — on a live route the runner kills the worker but keeps the lease, route, epoch, environments, and retry budget so resume respawns in place; an unclaimed chunk is withheld from the queue instead. Ranks below the human-gated statuses and above `delivering`/`running` ([execution.md](./execution.md)). |
 | `stopped` | Abandoned by an operator — terminal at any point after acquisition, artifacts and history retained. |
 | `done` | Delivered — the chunk's commit artifacts landed through the merge queue, or its PR reached a terminal state externally ([artifacts.md](./artifacts.md)). |
 
