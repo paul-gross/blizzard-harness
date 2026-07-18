@@ -13,5 +13,5 @@ Parent: [../index.md](../index.md).
 | [./work.md](./work.md) | Reasoning about a unit of work — what a chunk is, the statuses it can be in, how transitions move it, and how migration re-pins it across graphs |
 | [./graphs.md](./graphs.md) | Reasoning about the workflow definition — graphs and their immutability, nodes, edges, judgements and choices, and the ids-exact/names-correlate philosophy |
 | [./execution.md](./execution.md) | Reasoning about who runs a chunk — the hub/runner responsibility split, acquisition and routes, leases and epochs, what a worker session is primed with, and how tenure survives failure |
-| [./artifacts.md](./artifacts.md) | Reasoning about what work produces and how it lands — the artifact kinds, the never-code rule, the chunk's artifact series, and delivery through the merge queue |
+| [./artifacts.md](./artifacts.md) | Reasoning about what work produces and how it lands — the artifact kinds, the never-code rule, the chunk's artifact series, and delivery as graph-authored hub-command-node content |
 | [./humans.md](./humans.md) | Reasoning about where people enter the loop — asks, gate decisions, escalation, takeover, and the two parked conditions they produce |

@@ -21,12 +21,12 @@ What looks like "versions of a workflow" is emergent — a chain of migration-ta
 
 One station in one graph — "build", "review", "deliver".
 A node belongs to exactly one immutable graph; same-named nodes in different graphs are distinct nodes correlated only by name.
-There is no node *type*: what a type would encode is structural — a gate is a node whose judgement is human-judged, and delivery is a node the hub itself executes.
+There is no node *type*: what a type would encode is structural — a gate is a node whose judgement is human-judged, and a node whose `executor` is the hub itself is one the hub runs directly, no agent, ever ([standards/hub-nodes.md](../standards/hub-nodes.md)).
 
 | Facet | Meaning |
 |-------|---------|
 | name | The cross-graph correlator — what migration landing, artifact series, and runner-side gate configuration key on. |
-| executor | Who runs the node's steps: a runner (the default), or the hub itself — delivery is the first hub-executed node. |
+| executor | Who runs the node's steps: a runner (the default), or the hub itself — a hub-executed node declares its steps as `run:`, a shipped command list, never an agent turn ([standards/hub-nodes.md](../standards/hub-nodes.md)). The shipped `deliver` node is one instance of this shape, not a distinct kind. |
 | prompt | The node's invariant identity — what a worker at this station is asked to do; the arriving edge contributes arrival context on top. |
 | checks | The deterministic checks (tests, lint) whose results inform the exit judgement. |
 | judgement | How the node's exit is judged and the choices it can produce — see [Judgement and choices](#judgement-and-choices). |
@@ -48,7 +48,7 @@ The evaluation at a node's exit that selects the outgoing edge.
 
 - **Judged by the worker** (the default): elicited when the worker declares done, informed by the checks it ran; the worker selects exactly one of the node's choices. A missing or unparseable selection is a **failure, not a judgement** — it consumes a retry rather than an edge.
 - **Judged by a human**: the structural mark of a gate — the person renders the judgement by picking from the same choices, presented as buttons ([humans.md](./humans.md)).
-- **Judged by machinery** at hub-executed nodes — e.g. delivery selecting landed or conflicted ([artifacts.md](./artifacts.md)).
+- **Judged by a hub-executed node's own script**: its declared `run:` steps select one of the node's authored choices by exit code and stdout, the same fused choice/edge shape a worker's judgement uses — e.g. the shipped `deliver` node's script selecting `landed` or `conflict` ([artifacts.md](./artifacts.md), [standards/hub-nodes.md](../standards/hub-nodes.md)).
 
 A **choice** is one selectable outcome of one node's judgement, scoped to that judgement — never a global registry: `pass` in build and `pass` in review are different choices that happen to share a name.
 Each choice keys exactly one outgoing edge; its description is what sharpens a worker's judgement and what a gate renders as button text.
@@ -68,3 +68,4 @@ Each choice keys exactly one outgoing edge; its description is what sharpens a w
 ## See also
 
 - [./work.md](./work.md) — the chunk that travels this definition, and the migration that moves it between definitions.
+- [../standards/hub-nodes.md](../standards/hub-nodes.md) — the technical authoring schema for a hub-executed node: the `run:` step shape, the injected env-var contract, the outcome protocol, and the per-step idempotence rule.

@@ -31,7 +31,7 @@ The exact fact vocabulary and derivation queries live in the code. This table is
 | `needs_human` | Parked on **failure** — retries exhausted, or a worker died without a verdict; a person must requeue or take over ([humans.md](./humans.md)). |
 | `paused` | Held on an operator's per-chunk pause fact — on a live route the runner kills the worker but keeps the lease, route, epoch, environments, and retry budget so resume respawns in place; an unclaimed chunk is withheld from the queue instead. Ranks below the human-gated statuses and above `delivering`/`running` ([execution.md](./execution.md)). |
 | `stopped` | Abandoned by an operator — terminal at any point after acquisition, artifacts and history retained. |
-| `done` | Delivered — the chunk's commit artifacts landed through the merge queue, or its PR reached a terminal state externally ([artifacts.md](./artifacts.md)). |
+| `done` | Terminal — the chunk reached the graph's reserved terminal transition. Ordinarily this is immediate once the commit artifacts land, but a graph may instead route further runner work after landing before reaching it, so landing itself is not necessarily terminal ([artifacts.md](./artifacts.md) §Landing is not necessarily terminal). |
 
 Discarding or grouping an unacquired chunk is not a status: the chunk is simply gone from every listing, because the PM item remains the durable referent.
 

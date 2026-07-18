@@ -1,6 +1,6 @@
 # Artifacts and delivery
 
-What work produces and how it lands: the artifact kinds, the chunk's artifact series, and the merge queue.
+What work produces and how it lands: the artifact kinds, the chunk's artifact series, and delivery.
 Definitions, with the enforceable invariant written in the slot skeleton owned by `winter-canon:/rule-shape.md` (`canon:rule-shape`).
 Part of the [domain model](./index.md).
 
@@ -38,15 +38,21 @@ A chunk's artifacts accumulate as an **append-only, versioned series** per node 
 - **Reads resolve to the newest entry.** Later nodes fetching an artifact by name get the latest attempt's version; the shadowed history stays available.
 - **Series key on the node *name*.** After a migration or a re-published graph, a re-run of `build` keeps appending to the same series (`bzh:ids-exact-names-correlate` in [graphs.md](./graphs.md)); the exact producing node is on each artifact's provenance.
 
-## Delivery and the merge queue
+## Delivery
 
-The **merge queue** is the hub's single-writer delivery lane: the hub-executed deliver node lands one chunk's commit-pointer artifacts at a time, strictly first-in-first-out, fenced like any other step.
+Delivery is not built-in engine machinery — it is graph-authored content, a generic hub command node (`executor: hub` + `run:`, [graphs.md](./graphs.md) §Node) like any other, whose declared script IS the delivery policy. The shipped `deliver` node's script fetches every repo the chunk submitted a commit-pointer artifact for, verifies all of them merge cleanly, then pushes all of them — a chunk-atomic land, by the script's own construction.
 
-- **Per-repo landing with reconciliation.** A multi-repo chunk lands serially per repo, each land its own recorded fact; a retry after a partial delivery skips what already landed.
-- **Conflict is a judged outcome, not an error.** A merge or rebase conflict routes the chunk along a conflict edge within its graph ([graphs.md](./graphs.md)); the partial lands are retained for the redelivery's reconciliation.
-- **PR mode** delivers by opening a pull request instead of merging directly: the chunk is awaiting the external merge, and the PR reaching a terminal state — merged or closed — completes the chunk either way.
+- **Fleet-wide serialization is a generic fact, not a delivery-only lane.** One fact (`hub_exec_slot`) admits one chunk's hub node — any hub node, not delivery specifically — at a time; a chunk finding it held elsewhere simply tries again on a later tick.
+- **Per-repo landing with reconciliation is the script's own property, read by one shared convention.** The shipped delivery script lands a multi-repo chunk serially per repo, recording its own `merged/<repo>` marker immediately after each push; a re-run — after a crash, or a kicked-back redelivery — skips every repo whose marker is already durable. The engine imposes no per-repo landing *shape* of its own — a differently-authored script could land however it chooses — but it does read the `merged/<repo>` marker convention to tell a fully-landed continuation apart from a genuinely incomplete delivery ([standards/hub-nodes.md](../standards/hub-nodes.md)).
+- **Conflict is a judged, authored outcome, never an engine special case.** A dirty repo is one of the script's own outcome choices, routed like any other node's choice to whatever edge the graph authors — ordinarily back into `build`, carrying the retained partial lands for the next attempt's reconciliation.
+- **"PR mode" is an authored alternative policy, not a built-in mode.** Opening a pull request per repo and waiting for it to go cleanly mergeable, instead of merging directly, is one shipped example script (the `delivery-pr-ci` graph's `deliver` node) among however many an operator wants — adopted by minting a graph naming that node in place of the default's, never by an engine switch.
 - The holding runner **keeps the chunk's environments throughout delivery**, until the outcome is known.
+
+## Landing is not necessarily terminal
+
+A hub node's script authors its outcome choices exactly like a worker node's judgement ([graphs.md](./graphs.md) §Judgement and choices). The shipped `deliver` node's `landed` choice ordinarily routes straight to the graph's reserved terminal — but that routing is authored, not fixed: a graph may instead route `landed` into a further **runner** node, run in the holding runner's still-held environment after every repo has merged, before that node's own choice finally reaches the terminal. Landing is therefore informational, not itself a terminal condition — only the graph's reserved terminal (`done`, [work.md](./work.md) §Statuses) is.
 
 ## See also
 
 - [./work.md](./work.md) — the transition an artifact commits with, and the `done` status delivery derives.
+- [../standards/hub-nodes.md](../standards/hub-nodes.md) — the technical authoring schema for a hub command node like `deliver`: the `run:` step shape, the injected env-var contract, the outcome protocol, and the per-step idempotence rule its script is held to.
