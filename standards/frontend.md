@@ -35,7 +35,7 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 ## New panel chrome uses the kit (`bzh:frontend-kit`)
 
-**Rule.** A new or edited panel builds its chrome — panel shell, async loading/error/empty state, tone badges, action buttons, choice chips — from `fleet/lib/kit/`, never a re-typed local copy, and resolves any overlay wash through a `design/tokens.css` `--overlay-*` token rather than a raw `rgba(0, 0, 0, …)` literal. The structural rule this enforces — the kit as the presentational floor every container/presentational component builds on — is owned by [`../architecture/frontend-structure.md`](../architecture/frontend-structure.md) `bzh:frontend-kit-floor` (`canon:one-owner`); this entry is the toolchain-facing pointer to it.
+**Rule.** A component style resolves any overlay wash through a `design/tokens.css` `--overlay-*` token, never a raw `rgba(0, 0, 0, …)` literal, and `web:structural-gate` (`npm run structural-gate` in `web/`, [../verification/blizzard.md](../verification/blizzard.md)) is the tooled enforcement this file names for that ban plus the retired-chrome-class Detect below. The substantive rule this tooling enforces — a panel builds its chrome from `fleet/lib/kit/` rather than a re-typed local copy — is owned by [`../architecture/frontend-structure.md`](../architecture/frontend-structure.md) `bzh:frontend-kit-floor` (`canon:one-owner`); this entry is the toolchain-facing pointer to it, not a restatement.
 
 **Detect.** A component style block declaring `.panel`/`.p-hdr`/`.p-body`/`.status`/`.lbl` outside `fleet/lib/kit/`; a raw `rgba(0, 0, 0, …)` in a component style. `web:structural-gate` (`npm run structural-gate` in `web/`, [../verification/blizzard.md](../verification/blizzard.md)) runs the chrome-class half of this Detect on every push.
 
@@ -47,7 +47,7 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 ## Time, id, and status formatting resolve through the shared owner (`bzh:frontend-formatters`)
 
-**Rule.** A component never re-derives its own absolute/relative time string, id-shortening scheme, or status→color ladder — it resolves through `fleet`'s single owner: the time module (`fleet/lib/when.ts` — `formatWhen`, `formatAge`, `formatHeldFor`, `ageMs`, `formatUtcClock`, plus a component's own thin display wrapper where the surface's exact text needs it), `compactRef` (`fleet/lib/compact-ref.ts`) for every id shortening, and the `Tone`-typed status map (`fleet/lib/chunk-lanes.ts`'s `STATUS_TONE`, `local-panel/chunk-status.ts`'s `deriveMachineChunkStatus`) for status-to-color.
+**Rule.** A component never re-derives its own absolute/relative time string, id-shortening scheme, or status→color ladder — it resolves through `fleet`'s single owner: the time module (`fleet/lib/when.ts` — `formatWhen`, `formatAge`, `formatHeldFor`, `ageMs`, `formatUtcClock`, `formatSeenAgo`, plus a component's own thin display wrapper where the surface's exact text needs it), `compactRef` (`fleet/lib/compact-ref.ts`) for every id shortening, and the `Tone`-typed status map (`fleet/lib/chunk-lanes.ts`'s `STATUS_TONE`, `local-panel/chunk-status.ts`'s `deriveMachineChunkStatus`) for status-to-color.
 
 **Why.** Four time implementations, two id-shortening styles, and two parallel status-color tables (issue #81) meant a "fix formatting" task spanned every file with its own copy instead of one. A single owner also carries the skew-tolerance guarantee (`bzh:utc-instants`) once instead of re-implementing — and re-forgetting — it per component.
 
