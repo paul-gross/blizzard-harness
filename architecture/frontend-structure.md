@@ -33,11 +33,9 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **Why.** A single monolithic `public-api.ts` and a hand-written event-dispatch `switch` are both **guaranteed merge conflicts**: every feature that adds an export or a live-update path touches the same line range of the same file as every other feature in flight. Sub-barrels and a data-shaped registry turn "add a feature" into "add a file plus one export line plus one table row" — additive, not contended.
 
-**Scope.** This is the target shape the epic converges on; it is not yet built (`fleet/lib/public-api.ts` is today's single barrel, `sse/fleet-live.ts` today's `switch`) — both land with the barrel/SSE-dispatch phase. Until then, a new feature's barrel/dispatch addition is a small, isolated diff against the existing single files, not yet the fully disjoint shape this rule describes.
+**Detect.** A new top-level export added directly to `public-api.ts` instead of a feature sub-barrel; a new `case` added to `fleet-live.ts`'s `dispatch()` instead of a registry row.
 
-**Detect.** A new top-level export added directly to `public-api.ts` instead of a feature sub-barrel, once sub-barrels exist; a new `case` added to `fleet-live.ts`'s `dispatch()` instead of a registry row, once the registry exists.
-
-**Do.** `chunks/index.ts` re-exports every chunks-feature symbol; `public-api.ts` carries one `export * from './lib/chunks'` line for it. A new live-updated feature adds `{ type: 'my-event', keys: (data) => [...] }` to the registry table.
+**Do.** `chunks/index.ts` re-exports every chunks-feature symbol; `public-api.ts` carries one `export * from './lib/chunks'` line for it. A new live-updated feature adds a row keyed by its event type to `sse/fleet-live.ts`'s `EVENT_INVALIDATION_REGISTRY` (a `Record<HubEventType, (data) => readonly (readonly unknown[])[]>`, exhaustive over `HUB_EVENT_TYPES` so an unhandled event type is a compile error) rather than a `case` in `dispatch()`.
 
 **Don't.** Two features both editing the same 40-line span of `public-api.ts` to add their exports, or both adding a `case` to the same `switch` — exactly the conflict this rule exists to design away.
 
