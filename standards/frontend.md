@@ -59,6 +59,18 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **See also.** [`./wire.md`](./wire.md) `bzh:utc-instants` — the skew-tolerance rule `ageMs` implements once for every relative-age consumer.
 
+## Each library owns a distinct selector prefix (`bzh:frontend-selector-prefix`)
+
+**Rule.** Every Angular library owns one selector prefix, enforced by its own project's eslint `@angular-eslint/component-selector`/`@angular-eslint/directive-selector` config — `fleet-*` for `fleet`, `local-*` for `local-panel` — and no two libraries declare a component class of the same name.
+
+**Why.** Apps consume these libraries from source via tsconfig `paths`, so a selector or class collision between libraries stays invisible until the first app or page composes both — cheap to prevent with one eslint rule per project, expensive to untangle once a shell already renders the collision (issue #83).
+
+**Detect.** A `fleet-*` selector declared outside `fleet` (or any selector outside a library's configured prefix); a component class name declared in more than one library's `public-api.ts` surface.
+
+**Do.** `local-panel`'s `eslint.config.js` sets `prefix: "local"` on both selector rules; `local-panel`'s lease detail dock is `MachineDetail`/`local-machine-detail`, distinct from `fleet`'s `ChunkDetail`/`fleet-chunk-detail`.
+
+**Don't.** A new `local-panel` component declaring `fleet-*` because a neighboring file still uses it, or a class reusing another library's name because the two never render on the same page today.
+
 ## See also
 
 - [`./wire.md`](./wire.md) — `bzh:utc-instants`. A rendered age is the frontend's half of that rule: a browser's clock is not the hub's, so a derived age must tolerate a bounded skew and then fall through to the liveness the backend already derived, never clamp a large negative to a confident zero.
