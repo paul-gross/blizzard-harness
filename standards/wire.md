@@ -22,3 +22,4 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 - [`./persistence.md`](./persistence.md) — `bzh:sql-portable`, the portable-SQL constraint `UtcDateTime` (a plain `TypeDecorator` over `DateTime`) stays inside.
 - [`./python.md`](./python.md) — the toolchain (`ruff`, `pyright`, `pytest`) this rule's fitness test (`tests/test_wire_timestamps.py`) runs under.
 - [`../architecture/clean-architecture.md`](../architecture/clean-architecture.md) — `bzh:domain-core`, why `as_utc` stays at the domain comparison site rather than being deleted once the store is typed.
+- [`./frontend.md`](./frontend.md) — `bzh:frontend-formatters`, the frontend consumer's one owner: `ageMs`/`formatAge`/`formatSeenAgo` (`fleet/lib/when.ts`) implement this rule's bounded-skew-then-fall-through clause once for every relative-age render.

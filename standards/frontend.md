@@ -45,6 +45,20 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **See also.** [`../architecture/frontend-structure.md`](../architecture/frontend-structure.md) `bzh:frontend-kit-floor`, `bzh:frontend-container-presentational`.
 
+## Time, id, and status formatting resolve through the shared owner (`bzh:frontend-formatters`)
+
+**Rule.** A component never re-derives its own absolute/relative time string, id-shortening scheme, or status→color ladder — it resolves through `fleet`'s single owner: the time module (`fleet/lib/when.ts` — `formatWhen`, `formatAge`, `formatHeldFor`, `ageMs`, `formatUtcClock`, plus a component's own thin display wrapper where the surface's exact text needs it), `compactRef` (`fleet/lib/compact-ref.ts`) for every id shortening, and the `Tone`-typed status map (`fleet/lib/chunk-lanes.ts`'s `STATUS_TONE`, `local-panel/chunk-status.ts`'s `deriveMachineChunkStatus`) for status-to-color.
+
+**Why.** Four time implementations, two id-shortening styles, and two parallel status-color tables (issue #81) meant a "fix formatting" task spanned every file with its own copy instead of one. A single owner also carries the skew-tolerance guarantee (`bzh:utc-instants`) once instead of re-implementing — and re-forgetting — it per component.
+
+**Detect.** A component computing `Date.parse`/`new Date(...).toISOString().slice(...)`/manual hour-minute-second padding itself instead of calling into `when.ts`; a raw `id.slice(0, N)` instead of `compactRef`; a component-local status→color `Record` or CSS ladder instead of the shared `Tone` vocabulary (`fleet/lib/kit/tone.ts`).
+
+**Do.** `formatWhen(iso)` for an absolute board stamp, `formatAge(ageMs(iso, now))` for a relative one, `compactRef(id)` for any shortened id, `Tone` (imported from `fleet`) as the type a derived status's color resolves to.
+
+**Don't.** A new panel's own `function clockTime(at) { ... }` or `id.slice(0, 12)` — both already have one owner in `fleet`.
+
+**See also.** [`./wire.md`](./wire.md) `bzh:utc-instants` — the skew-tolerance rule `ageMs` implements once for every relative-age consumer.
+
 ## See also
 
 - [`./wire.md`](./wire.md) — `bzh:utc-instants`. A rendered age is the frontend's half of that rule: a browser's clock is not the hub's, so a derived age must tolerate a bounded skew and then fall through to the liveness the backend already derived, never clamp a large negative to a confident zero.
