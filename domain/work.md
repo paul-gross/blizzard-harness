@@ -10,7 +10,8 @@ The hub's unit of orchestrated work: it wraps one or more backlog items from the
 
 - **The PM item is the durable referent; the chunk is ephemeral.** An unacquired chunk may be discarded or grouped away, and re-ingesting the same item mints a fresh chunk — nothing of value lives only on an unstarted chunk. An item already wrapped by a live chunk cannot be ingested again.
 - **The item's contents are never stored.** A chunk holds pointers; reads pass through to the backing system.
-- **Pinned to exactly one immutable graph.** The pin is set at mint and changes only when a [migration](#migration) applies — never silently.
+- **Pinned to exactly one immutable graph, once it has left `not_ready`.** The pin is set at mint from a default and, while the chunk still rests `not_ready`, is a plain editable selection — the operator's one pre-flight window to repin it. Once the chunk leaves `not_ready` the pin is immutable and changes only when a [migration](#migration) applies — never silently.
+- **The model selection is a chunk property alongside the graph pin.** Set at mint from the default, editable only while the chunk rests `not_ready`, immutable thereafter — the same pre-flight window as the graph pin, not a fact log.
 - **Nothing on it is a stored status.** Its current node derives from its newest accepted transition, and its status derives from its recorded facts (`bzh:facts-not-status` in [../architecture/system-shape.md](../architecture/system-shape.md)).
 - **Held by at most one runner at a time** — see [execution.md](./execution.md) for acquisition, tenure, and fencing.
 
@@ -22,6 +23,7 @@ The exact fact vocabulary and derivation queries live in the code. This table is
 
 | Status | Meaning |
 |--------|---------|
+| `not_ready` | Minted and resting — visible on the board, never claimed. The one window the chunk's graph pin and model selection are editable in place; an explicit promote moves it to `ready`. |
 | `ready` | Ingested into a chunk and unclaimed — in the hub's queue with no live route. |
 | `running` | Claimed by a runner and being worked. |
 | `delivering` | In the hub's own hands — queued for or undergoing delivery, or awaiting an external merge; the holding runner keeps its environments until the outcome is known. |
@@ -45,15 +47,15 @@ One entry in a chunk's append-only movement record: the fact that a judgement at
 
 ## A migration is never a transition (`bzh:migration-not-transition`)
 
-**Rule.** Movement between graphs is a **migration** — its own recorded fact re-pinning the chunk — never a transition: a transition moves a chunk along an edge within its pinned graph, and no edge crosses graphs.
+**Rule.** Movement between graphs, for a chunk that has left `not_ready`, is a **migration** — its own recorded fact re-pinning the chunk — never a transition: a transition moves a chunk along an edge within its pinned graph, and no edge crosses graphs. While a chunk still rests `not_ready` its graph (and model) selection is a plain editable property, not a pin this rule governs — that window closes the moment the chunk leaves `not_ready`.
 
-**Why.** Transitions are judged, fenced movement within one immutable definition; letting one span graphs would re-route in-flight work without the explicit intent, record, and fencing that migration provides.
+**Why.** Transitions are judged, fenced movement within one immutable definition; letting one span graphs would re-route in-flight work without the explicit intent, record, and fencing that migration provides. Before the chunk has run at all, there is no in-flight attempt to re-route and nothing a migration's fencing protects — repinning is pre-flight selection, not movement.
 
-**Detect.** A design or change in which a transition's two nodes belong to different graphs, an edge targets a node of another graph, or a chunk's graph pin changes with no migration record.
+**Detect.** A design or change in which a transition's two nodes belong to different graphs, an edge targets a node of another graph, or a chunk **that has left `not_ready`** has its graph pin change with no migration record.
 
-**Do.** Re-pin via a migration record — deferred to the chunk's next transition, or forced with a fresh epoch — landing on the name-matched node, or the target's entry node when no name matches.
+**Do.** Re-pin via a migration record — deferred to the chunk's next transition, or forced with a fresh epoch — landing on the name-matched node, or the target's entry node when no name matches. Edit a `not_ready` chunk's graph or model selection in place; no migration record applies to a chunk that has never run.
 
-**Don't.** Add a cross-graph edge, or update a chunk's pinned graph in place with no record of the re-pin.
+**Don't.** Add a cross-graph edge, or update the pinned graph of a chunk that has left `not_ready` in place with no record of the re-pin.
 
 ## Migration
 
