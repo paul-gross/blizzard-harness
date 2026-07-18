@@ -43,7 +43,7 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 ## A facts-level invariant checker (`bzh:invariant-checker`)
 
-**Rule.** A checker of assertions evaluated over both stores' facts after any crash → restart → recover cycle holds the durable invariants: no duplicate env binding, at most one accepted transition per node-step epoch, no double delivery with per-repo lands idempotent and per-repo `pr.opened` idempotent, every derived status computable with exactly one match, and a gapless outbound-buffer sequence.
+**Rule.** A checker of assertions evaluated over both stores' facts after any crash → restart → recover cycle holds the durable invariants: no duplicate env binding, at most one accepted transition per node-step epoch, no double delivery with per-repo lands idempotent and per-repo `pr.opened` idempotent, every derived status computable with exactly one match, a gapless outbound-buffer sequence, and usage attributed exactly once per `(lease, generation, kind)`.
 
 **Why.** Because both stores are facts-only (`bzh:facts-not-status`), the checker is essentially a library of SQL assertions plus the status-derivation queries themselves — and a failure names the exact violated invariant rather than a vague corruption. It is the assertion the sweep runs after every armed crash, alongside the scenario's own expected outcome.
 
