@@ -33,6 +33,18 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **Don't.** Hand-roll a request against `/api/...`, or leave the generated client out of version control — API changes then land invisibly and installs need a codegen toolchain.
 
+## New panel chrome uses the kit (`bzh:frontend-kit`)
+
+**Rule.** A new or edited panel builds its chrome — panel shell, async loading/error/empty state, tone badges, action buttons, choice chips — from `fleet/lib/kit/`, never a re-typed local copy, and resolves any overlay wash through a `design/tokens.css` `--overlay-*` token rather than a raw `rgba(0, 0, 0, …)` literal. The structural rule this enforces — the kit as the presentational floor every container/presentational component builds on — is owned by [`../architecture/frontend-structure.md`](../architecture/frontend-structure.md) `bzh:frontend-kit-floor` (`canon:one-owner`); this entry is the toolchain-facing pointer to it.
+
+**Detect.** A component style block declaring `.panel`/`.p-hdr`/`.p-body`/`.status`/`.lbl` outside `fleet/lib/kit/`; a raw `rgba(0, 0, 0, …)` in a component style. `web:structural-gate` (`npm run structural-gate` in `web/`, [../verification/blizzard.md](../verification/blizzard.md)) runs the chrome-class half of this Detect on every push.
+
+**Do.** `<fleet-kit-panel [label]="…" [count]="…">` for a panel shell; `<fleet-kit-async-state [state]="…">` for the loading/error/empty triad; `var(--overlay-25)` for a panel-head wash.
+
+**Don't.** A new panel's own `.panel { background: linear-gradient(...); border: 1px solid var(--bezel); }` plus a hand-rolled `@if isPending() { <p class="status">…</p> }` triad — both already exist once in the kit.
+
+**See also.** [`../architecture/frontend-structure.md`](../architecture/frontend-structure.md) `bzh:frontend-kit-floor`, `bzh:frontend-container-presentational`.
+
 ## See also
 
 - [`./wire.md`](./wire.md) — `bzh:utc-instants`. A rendered age is the frontend's half of that rule: a browser's clock is not the hub's, so a derived age must tolerate a bounded skew and then fall through to the liveness the backend already derived, never clamp a large negative to a confident zero.
