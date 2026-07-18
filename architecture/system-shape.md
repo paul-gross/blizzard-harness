@@ -43,6 +43,20 @@ A chunk's **status** is always *derived* by query from those facts, never writte
 
 **Don't.** Write a `chunk.status = "running"` column and update it as the chunk moves — the column outlives the truth the instant the process dies.
 
+## Worker environments are allowlisted, never inherited (`bzh:worker-env-allowlist`)
+
+**Rule.** A worker/judge/resume child environment is built from an explicit allowlist — a fixed base set plus deliberate additions (locale variables) plus the operator's declared passthrough — never from a full copy of the daemon's own `os.environ`.
+
+**Why.** The runner process holds daemon credentials (a hub bearer token, forge tokens); a child built by copying the parent environment carries any such secret into every worker/judge/resume invocation by default, where a still-untrusted harness prompt or transcript can leak it. Building the child from an allowlist makes a daemon credential's absence structural rather than a property some filter has to remember to apply.
+
+**Scope.** Governs the spawn/judge/resume environment construction on the runner side of the harness seam (`bzh:pluggable-seams`); it does not bound what a harness binary itself may read from its own process environment once launched.
+
+**Detect.** `os.environ` (or `env=None`/omitted `env=`, which inherits the parent) passed directly into a `subprocess` call that launches a worker, judge, or resume harness process, rather than through the one allowlist-building function.
+
+**Do.** `_allowlisted_env(passthrough)` in `blizzard/runner/harness/internal/claude_code_adapter.py` builds every child env from the base allowlist + `LC_*` + `env_passthrough`; identity variables (`BLIZZARD_LEASE_ID`, …) are then added explicitly per spawn.
+
+**Don't.** `subprocess.Popen(cmd, env=os.environ)` (or a bare `env=dict(os.environ)`) handed to a worker launch — the child now inherits `BZ_HUB_TOKEN` and every other daemon secret by accident.
+
 ## See also
 
 - [./crash-correctness.md](./crash-correctness.md) — the four daemon requirements built on `bzh:facts-not-status` and `bzh:deterministic-shell`.
