@@ -35,6 +35,8 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 | `BZ_HUB_MARKER_CALLBACK_URL` | `POST {name, content}` records a marker mid-run; wrapped by `blizzard hub record-marker NAME [CONTENT]`. |
 | `BZ_FORGE_URL` / `BZ_FORGE_TOKEN` / `BZ_FORGE_OWNER` | The hub's own configured forge credential — present only when the hub is configured with one. |
 
+Beyond these keys a step inherits the hub daemon's own environment, with one strengthened guarantee: the executor prepends the hub interpreter's own bin directory to `PATH`, so a bare `python3` in a `run:` command always resolves to the interpreter the hub itself runs under — the one that can import `blizzard` — regardless of how the daemon was launched (a systemd unit invoking the venv binary by absolute path carries no venv on its inherited `PATH`).
+
 **Why.** A `run:` step is an ordinary subprocess with no access to the hub's domain objects; naming the whole env here means a graph author never guesses at an undocumented field, and a reviewer can tell a script reading anything else is reading nothing.
 
 **Detect.** A `run:` script referencing an env var not in this table; a script hardcoding a forge URL or token instead of reading the injected credential.
