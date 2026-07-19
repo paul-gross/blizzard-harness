@@ -14,7 +14,7 @@ Conventional Commits with a scope:
     Co-Authored-By: Claude <noreply@anthropic.com>
 
 - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `perf`, `style`, `ai`. `docs` is the common case here.
-- Scope: `blizzard-harness`, or a subsystem within it (`architecture`, `standards`, `verification`).
+- Scope: the subsystem the change touches (`architecture`, `standards`, `verification`, …). Use the bare repo name `blizzard-harness` only for a change that genuinely spans the whole harness and fits no subsystem.
 - Use `Closes #N` for a GitHub issue this commit finishes; the workspace-level rules are `workspace:/context/project/contributing.md`.
 - The `/wf-commit` skill (from the `winter-workflow` extension) generates commits in this exact format — prefer it over hand-writing messages.
 
