@@ -31,7 +31,7 @@ There is no node *type*: what a type would encode is structural — a gate is a 
 | checks | The deterministic checks (tests, lint) whose results inform the exit judgement. |
 | judgement | How the node's exit is judged and the choices it can produce — see [Judgement and choices](#judgement-and-choices). |
 | retries | The bounded failure budget — crashes, verdict-less exits, reaps — and where exhaustion escalates; a *judged* failure edge never consumes it. |
-| produces | The artifact names the node is expected to submit ([artifacts.md](./artifacts.md)). |
+| produces | The artifact names the node is expected to submit ([artifacts.md](./artifacts.md)) — on a worker node, the prompt must instruct the worker to submit each by name ([standards/worker-nodes.md](../standards/worker-nodes.md)). |
 | session | Whether the node's steps resume the chunk's agent session or start cold — resumed by default; review-style nodes opt into cold eyes. |
 
 ## Edge
@@ -71,3 +71,4 @@ Each choice keys exactly one outgoing edge; its description is what sharpens a w
 
 - [./work.md](./work.md) — the chunk that travels this definition, and the migration that moves it between definitions.
 - [../standards/hub-nodes.md](../standards/hub-nodes.md) — the technical authoring schema for a hub-executed node: the `run:` step shape, the injected env-var contract, the outcome protocol, and the per-step idempotence rule.
+- [../standards/worker-nodes.md](../standards/worker-nodes.md) — the technical authoring contract for a worker node's `produces:` list: the prompt's attach instruction, the fallback, and the enforcement backstop.
