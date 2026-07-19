@@ -53,6 +53,8 @@ The evaluation at a node's exit that selects the outgoing edge.
 A **choice** is one selectable outcome of one node's judgement, scoped to that judgement — never a global registry: `pass` in build and `pass` in review are different choices that happen to share a name.
 Each choice keys exactly one outgoing edge; its description is what sharpens a worker's judgement and what a gate renders as button text.
 
+- **A choice may target another graph.** A choice's `to:` normally names a sibling node or the reserved terminal; it may instead name `graph:<name>` — a cross-graph **migration** target. Taking that choice re-pins the chunk to the named graph and re-queues it at the landing node (name-matched, else the target's entry), recording a migration fact, never a transition — so `bzh:migration-not-transition` in [work.md](./work.md) still holds (the authored choice carries the target; the *movement* is a migration, not an edge to another graph's node, which stays forbidden). A choice may also carry an optional `model:` the migration re-pins the chunk to. The target is resolved by **name** when taken (late-bound, the same binding ingest uses, `bzh:ids-exact-names-correlate`), so authoring a choice whose target graph is not yet minted is a mint-time warning, not an error.
+
 ## Ids are exact, names correlate (`bzh:ids-exact-names-correlate`)
 
 **Rule.** Exact references — a transition's nodes, an artifact's provenance, an edge's choice — carry **ids**, which pin one immutable definition; continuity across graphs — migration landing, artifact series, runner-side gate selection — keys on **names**. Never the reverse.
