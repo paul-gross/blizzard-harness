@@ -41,7 +41,7 @@ The worker's **heartbeat** is a side effect of its tool use — no agent coopera
 
 **Why.** A worker presumed dead can wake and write after its successor started; fencing makes the successor authoritative — the zombie's late writes bounce — so a zombie can lose work but never land wrong work, without requiring anyone to kill processes reliably.
 
-**Detect.** A state-advancing write path with no epoch check; a reap, reassignment, or forced-migration design that assumes the old holder is really dead instead of fencing it out; the epoch check skipped once a chunk is terminal.
+**Detect.** A state-advancing write path with no epoch check; a reap or reassignment design that assumes the old holder is really dead instead of fencing it out, or a migration recorded at the submitting attempt's own epoch that relies on it rather than on next-claim fencing; the epoch check skipped once a chunk is terminal.
 
 **Do.** Reassignment mints new leases above a floor set over the old holder's newest epoch, so the old holder's in-flight submission is rejected on arrival.
 

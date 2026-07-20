@@ -9,13 +9,12 @@ Part of the [domain model](./index.md).
 One identity, two parts:
 
 - **An immutable definition** — the nodes, edges, prompts, and judgements. Every edit creates a new graph; an existing definition never changes, so anything pinned to it can trust it forever.
-- **Mutable operational metadata beside it** — `enabled`, the auto-migrate policy, and the migration-target pointer. The metadata is the graph's only mutable surface.
+- **Mutable operational metadata beside it** — `enabled`, the graph's only mutable surface.
 
 There is **no graph family or version tree**: graphs are standalone, and any graph may migrate its chunks to any graph so long as the node mapping gets them over.
-What looks like "versions of a workflow" is emergent — a chain of migration-target pointers between graphs that happen to share a name.
+What looks like "versions of a workflow" is emergent, not modeled: nothing on a graph links it to a successor — a migration is what moves a chunk onto another graph that happens to share its name (which one, when several do, is the `enabled` bullet below) ([work.md](./work.md) §Migration owns how and when a chunk migrates).
 
-- **`enabled` gates exactly one thing: being auto-migrated *to*.** While a graph is disabled no chunk drifts into it — and nothing else changes: its own chunks continue, explicit requests may still target it. Graphs are created enabled.
-- **The migration target may point anywhere.** Ordinarily the graph's re-published successor; pointing at a differently-named graph retires this workflow into another one.
+- **`enabled` gates being resolved as a migration target.** A retired graph is excluded from every name-based resolution (the default pin at mint, an authored choice's `graph:<name>` target, a migration's target-by-name lookup) and refuses an explicit id-named target too — its own chunks continue undisturbed; only new targeting is blocked. Among the enabled graphs sharing a name, resolution picks the **newest**. Graphs are created enabled.
 
 ## Node
 
@@ -63,7 +62,7 @@ Each choice keys exactly one outgoing edge; its description is what sharpens a w
 
 **Detect.** A design that matches an exact reference by name — two graphs' `build` nodes conflated — or that correlates across graphs by id, such as a migration expecting the target graph to contain the same node id.
 
-**Do.** A transition records the exact ids of its two nodes; a deferred migration lands the chunk on the target graph's node whose *name* matches the one it left.
+**Do.** A transition records the exact ids of its two nodes; an authored-choice migration lands the chunk on the target graph's node whose *name* matches the one it left.
 
 **Don't.** Key an artifact series on the node id — the series would break at every migration or re-published graph, though the work is the same station's.
 
