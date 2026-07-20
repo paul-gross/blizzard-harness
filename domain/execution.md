@@ -43,7 +43,7 @@ The worker's **heartbeat** is a side effect of its tool use — no agent coopera
 
 **Detect.** A state-advancing write path with no epoch check; a reap or reassignment design that assumes the old holder is really dead instead of fencing it out, or a migration recorded at the submitting attempt's own epoch that relies on it rather than on next-claim fencing; the epoch check skipped once a chunk is terminal.
 
-**Do.** Reassignment mints new leases above a floor set over the old holder's newest epoch, so the old holder's in-flight submission is rejected on arrival.
+**Do.** Every fresh claim of a re-queued chunk — a reassignment, or a route-released re-queue such as a detach or a migration ([work.md](./work.md) §Migration) — mints new leases above the **hub-supplied** epoch floor: the chunk's newest epoch as the hub knows it, carried on the claim, not whatever local history the claiming runner happens to hold. A runner that never drove the chunk (no local floor of its own) still mints strictly above every prior attempt, so the old holder's in-flight submission is rejected on arrival.
 
 **Don't.** Accept a transition because the submitting runner still holds the route — route tenure is not attempt fencing.
 
