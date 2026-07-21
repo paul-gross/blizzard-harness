@@ -41,6 +41,12 @@ Each rule follows the slot skeleton owned by `winter-canon:/rule-shape.md` (`can
 
 **Don't.** Assert a window is crash-safe in prose without a registry entry the sweep can arm — the claim is untested. Prefix a new point `pull.after-pause-kill.before-park` because that's where its `.reached()` call sits, instead of `pause.after-kill.before-park` for the scenario whose window it actually guards.
 
+### Recorded exemptions — durable state with no dangerous window
+
+Not every durable write opens a window this registry must name; a write with **no unsafe partial-write window** has nothing to arm, and that must be a *stated* position, not an implicit one (the "Don't" above bars asserting a window *safe without arming it* — this is the distinct case of there being *no window at all*). Record such a decision here when a change adds durable state that a reviewer would otherwise expect a sweep point for:
+
+- **The runner's jti replay cache (issue #95, decision D4).** The runner-store table `jwt_jti_seen(jti PK, aud, expires_at)` backs single-use of a hub-signed federation JWT across a restart within the 60s token window. Its "check-not-seen → insert → mint session" path is **one transaction under the `jti` primary key**, so no interleaving admits a replay: a crash *after* the insert but *before* the session mint loses only the runner-domain session, forcing a fresh, harmless re-bounce through the hub (a liveness annoyance, never a safety break — the row that would reject a replay is already durable). There is therefore **no `bzh:crash-point-registry` entry** for it, and **no new `bzh:invariant-checker` assertion**: jti uniqueness is a store-level PK constraint the engine enforces, not a derived cross-fact invariant the checker must recompute. This cache is not a loop step, so the loop-driven sweep families never reach it, and correctly so.
+
 ## A facts-level invariant checker (`bzh:invariant-checker`)
 
 **Rule.** A checker of assertions evaluated over both stores' facts after any crash → restart → recover cycle holds the durable invariants: no duplicate env binding, at most one accepted transition per node-step epoch, no double delivery with per-repo lands idempotent and per-repo `pr.opened` idempotent, every derived status computable with exactly one match, a gapless outbound-buffer sequence, and usage attributed exactly once per `(lease, generation, kind)`.
