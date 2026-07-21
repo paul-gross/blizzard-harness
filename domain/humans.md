@@ -30,7 +30,7 @@ A worker that needs input asks a durable question — free-form, or with options
 A **decision** is a gate's parking row: a durable multiple-choice ask written where a worker-judged node would have written its transition, carrying the step's artifacts so the deciding human sees what they are judging.
 
 - **The choices are the node's judgement choices** ([graphs.md](./graphs.md)) — what the board and chat bot render as buttons.
-- **Pending derives**: a decision no transition references is open, and the chunk derives `waiting_on_human` from it — no live lease while parked.
+- **Pending derives**: a decision no resolving fact references is open, and the chunk derives `waiting_on_human` from it — no live lease while parked. The resolving fact is normally the transition the holding runner writes (below); when the resolved choice migrates cross-graph it is the migration record instead — or, if that migration's target is unresolvable, the escalation — since a migration writes no transition ([work.md](./work.md) §Migration).
 - **Resolution is recorded once** — first write wins, like an answer — and the holding runner then writes the ordinary transition referencing the decision: the runner still advances the chunk.
 - **Gates arrive two ways**: structurally, as a human-judged node in the graph; or by **runner configuration** selecting node names — human sign-off added to an existing workflow without editing any graph. At a human-judged node a runner-submitted transition is rejected; human sign-off cannot be bypassed.
 
