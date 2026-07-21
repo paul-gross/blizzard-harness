@@ -31,7 +31,7 @@ There is no node *type*: what a type would encode is structural — a gate is a 
 | judgement | How the node's exit is judged and the choices it can produce — see [Judgement and choices](#judgement-and-choices). |
 | retries | The bounded failure budget — crashes, verdict-less exits, reaps — and where exhaustion escalates; a *judged* failure edge never consumes it. |
 | produces | The artifact names the node is expected to submit ([artifacts.md](./artifacts.md)) — on a worker node, the prompt must instruct the worker to submit each by name ([standards/worker-nodes.md](../standards/worker-nodes.md)). |
-| session | Whether the node's steps resume the chunk's agent session or start cold — resumed by default; review-style nodes opt into cold eyes. |
+| session | Whether the node's steps resume the chunk's agent session or start cold, and which session: `fresh` spawns a brand-new session on every entry; `resume` (the default) resumes the chunk's most-recent session on this runner, whichever node-step last ran, regardless of which node; `resume:<node>` resumes the most-recent session recorded for a lease of the named node — e.g. `build` re-entered after a fresh-session `review` resumes its own prior build session, not the reviewer's — and graph validation rejects a `<node>` absent from the graph. Any resume form falls back to spawning fresh when no matching session exists (first arrival at the graph, a chunk reassigned to a runner that never held the session, or the named node has never run) — never an error, never a stall. Governs node **entry** only: a within-node retry always spawns fresh. |
 
 ## Edge
 
