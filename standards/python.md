@@ -16,6 +16,8 @@ The commands a change must pass:
 | Typecheck | `uv run pyright` |
 | Test | `uv run pytest` (the unit and component tiers — [./frontend.md](./frontend.md) and [../verification/blizzard.md](../verification/blizzard.md) own the browser tiers) |
 
+`pyproject.toml`'s `[tool.ruff.lint] select` enables exactly `E, F, I, UP, B, C4, SIM, RUF` — **not** bandit's `S` family, so a `# noqa: S10x` directive silences a rule ruff never runs and fails as an unused `noqa` instead.
+
 **Why.** One packaging tool and one lint/format/type toolchain, gated from the first commit, keeps quality cheap to satisfy — the cost of a clean tree is paid continuously rather than as a later cleanup — and gives every agent the same commands to run before pushing regardless of which blizzard component it touched.
 
 **Detect.** A second formatter (black, autopep8) or packaging tool (poetry, pip-tools) introduced alongside these; Python changes pushed without the commands above passing.
