@@ -15,3 +15,4 @@ Parent: [../index.md](../index.md).
 | [./execution.md](./execution.md) | Reasoning about who runs a chunk — the hub/runner responsibility split, acquisition and routes, leases and epochs, what a worker session is primed with, and how tenure survives failure |
 | [./artifacts.md](./artifacts.md) | Reasoning about what work produces and how it lands — the artifact kinds, the never-code rule, the chunk's artifact series, and delivery as graph-authored hub-command-node content |
 | [./humans.md](./humans.md) | Reasoning about where people enter the loop — asks, gate decisions, escalation, takeover, and the two parked conditions they produce |
+| [./operations.md](./operations.md) | Reasoning about operational visibility — the durable, typed, severity-ranked operational event log that surfaces worker/runner failures, and how escalation appears in it as one unified event kind |

@@ -40,6 +40,7 @@ A chunk parks `needs_human` when the system is out of moves: retries exhausted, 
 
 - The escalation **carries the literal session-resume command**, so the person starts where the worker stopped.
 - It **closes by supersession, never resolution**: requeueing makes the chunk leasable again, and the next attempt's lease is what closes the escalation — there is no "resolved" fact to write.
+- An open escalation also **appears as one `needs-human` event** in the unified operational event log ([operations.md](./operations.md)), projected at read time — its own fact and supersession rule are unchanged; the log just gives `needs_human` one home alongside the other operational events rather than a separate surface.
 
 ## Takeover
 
