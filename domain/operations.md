@@ -1,5 +1,9 @@
 # Operational visibility (`bzh:operational-event-log`)
 
+The hub's durable, severity-ranked record of the operationally-significant failures that happen to runners and workers.
+Definitional — a taxonomy of the operational event kinds and how they surface (`canon:rule-shape` §File kinds).
+Part of the [domain model](./index.md).
+
 The failures that cost the most are the least visible: a worker that exits without recording a completion, a chunk stalled behind a dead process, a spawn/push/attach command that failed on a missing environment var. A chunk's *status* says a chunk is stuck; it does not say **why**. The **operational event log** is the surface that does.
 
 ## What it is
